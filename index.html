@@ -3,54 +3,850 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Математическая Вселенная</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- MathJax для формул -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <title>Orbital Calculator</title>
     <style>
-        .formula {
+        :root {
+            /* Тёмная тема (более тёмная) */
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #8a89c0;
+            --background: #0d0d17;
+            --card: #1a1a2e;
+            --text: #e0e0e0;
+            --error: #e94560;
+            --header-bg: #1a1a2e;
+            --results-bg: #16213e;
+            --footer-color: #9e9e9e;
+            --sidebar-bg: #1a1a2e;
+            --toggle-bg: #4a4a8a;
+            --toggle-handle: #5c6bc0;
+            --border: #2d2d4d;
+        }
+
+        .light-theme {
+            /* Обновлённая светлая тема в оливковых тонах */
+            --primary: #f8f9f0;
+            --secondary: #eef0e1;
+            --accent: #636B2F;
+            --background: #f2f4e7;
+            --card: #ffffff;
+            --text: #333333;
+            --error: #c44d58;
+            --header-bg: #f0f2e1;
+            --results-bg: #e6e9d1;
+            --footer-color: #757575;
+            --sidebar-bg: #f0f2e1;
+            --toggle-bg: #c8ccaa;
+            --toggle-handle: #636B2F;
+            --border: #d0d3b5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s, transform 0.3s, opacity 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
             padding: 20px;
-            font-size: 1.2em;
-            color: #d63384;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        header {
+            background: var(--header-bg);
+            color: var(--text);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 900px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background-color: var(--card);
+            color: var(--text);
+        }
+
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 107, 47, 0.2);
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .radio-group {
+            margin-bottom: 20px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .radio-option input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .orbit-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .results {
+            background-color: var(--results-bg);
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 300px;
+            white-space: pre-line;
+            font-family: monospace;
+            overflow: auto;
+            max-height: 500px;
+            border: 1px solid var(--border);
+        }
+
+        .error {
+            color: var(--error);
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .hint {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--footer-color);
+            font-size: 0.9rem;
+        }
+
+        /* Переработанные стили для бокового меню */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            right: 0;
+            background-color: var(--sidebar-bg);
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 60px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            color: var(--text);
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(99, 107, 47, 0.1);
+        }
+
+        .sidebar .closebtn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+            color: var(--accent);
+            z-index: 1100;
+        }
+
+        /* Переработанная кнопка открытия меню */
+        .openbtn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 900;
+            opacity: 0.9;
+            transform: scale(1);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(4px);
+        }
+
+        .openbtn:hover {
+            opacity: 1;
+            transform: scale(1.05);
+            background: rgba(99, 107, 47, 0.15);
+        }
+
+        /* Скрыть кнопку при открытом меню */
+        .sidebar-open .openbtn {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        /* Стили для переключателя тем */
+        .theme-switch {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .theme-label {
+            flex: 1;
+            font-size: 1rem;
+            margin-right: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--toggle-bg);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--toggle-handle);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--toggle-bg);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
         }
     </style>
 </head>
-<body>
+<body class="dark-theme">
+    <!-- Боковое меню -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="theme-switch">
+            <span class="theme-label">Тёмная тема</span>
+            <label class="switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
+            <span class="theme-label">Светлая тема</span>
+        </div>
+    </div>
+
+    <!-- Кнопка открытия меню -->
+    <button class="openbtn" onclick="openNav()">☰</button>
+
     <header>
-        <h1>✨ Математическая Галактика ✨</h1>
+        <h1>Orbital Calculator</h1>
+        <div class="subtitle">Расчёт манёвров перехода для RSS</div>
     </header>
     
-    <main>
-        <section>
-            <h2>Формула Эйлера</h2>
-            <div class="formula">
-                \[ e^{i\pi} + 1 = 0 \]
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Параметры небесного тела</h2>
+            
+            <div class="form-group">
+                <label for="planet">Планета:</label>
+                <select id="planet">
+                    <option value="0">Меркурий</option>
+                    <option value="1">Венера</option>
+                    <option value="2" selected>Земля</option>
+                    <option value="3">Марс</option>
+                    <option value="4">Юпитер</option>
+                    <option value="5">Сатурн</option>
+                    <option value="6">Уран</option>
+                    <option value="7">Нептун</option>
+                    <option value="8">Плутон</option>
+                </select>
             </div>
-        </section>
+            
+            <div class="form-group" id="satellite-group">
+                <label for="satellite">Спутник:</label>
+                <select id="satellite">
+                    <option value="-1">(Сама планета)</option>
+                </select>
+            </div>
+        </div>
         
-        <section>
-            <h2>Теорема Пифагора</h2>
-            <div class="formula">
-                \[ a^2 + b^2 = c^2 \]
+        <div class="card">
+            <h2 class="card-title">Начальная орбита</h2>
+            
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="initMethod1" name="initOrbit" value="0" checked>
+                    <label for="initMethod1">Перицентр + апоцентр</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="initMethod2" name="initOrbit" value="1">
+                    <label for="initMethod2">Большая полуось + эксцентриситет</label>
+                </div>
             </div>
-            <div class="calculator">
-                <input type="number" id="a" placeholder="Катет a">
-                <input type="number" id="b" placeholder="Катет b">
-                <button onclick="calculate()">Вычислить гипотенузу</button>
-                <p>Результат: <span id="result"></span></p>
+            
+            <div id="initOrbitInputs">
+                <div class="orbit-inputs">
+                    <div class="form-group">
+                        <label for="periapsisInit">Перицентр (км):</label>
+                        <input type="number" id="periapsisInit" value="150">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="apoapsisInit">Апоцентр (км):</label>
+                        <input type="number" id="apoapsisInit" value="150">
+                    </div>
+                </div>
             </div>
-        </section>
-    </main>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Целевая орбита</h2>
+            
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="targetMethod1" name="targetOrbit" value="0" checked>
+                    <label for="targetMethod1">Перицентр + апоцентр</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="targetMethod2" name="targetOrbit" value="1">
+                    <label for="targetMethod2">Большая полуось + эксцентриситет</label>
+                </div>
+            </div>
+            
+            <div id="targetOrbitInputs">
+                <div class="orbit-inputs">
+                    <div class="form-group">
+                        <label for="periapsisTarget">Перицентр (км):</label>
+                        <input type="number" id="periapsisTarget" value="150">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="apoapsisTarget">Апоцентр (км):</label>
+                        <input type="number" id="apoapsisTarget" value="150">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Результаты расчёта</h2>
+            <div class="results" id="results">Введите параметры орбит и нажмите "Рассчитать"</div>
+            <button id="calculateBtn">Рассчитать</button>
+        </div>
+    </div>
     
+    <footer>
+        Orbital Calculator &copy; 1917 | Вагинальный Голкипер
+    </footer>
+
     <script>
-        // Простой математический калькулятор
-        function calculate() {
-            const a = parseFloat(document.getElementById('a').value);
-            const b = parseFloat(document.getElementById('b').value);
-            const c = Math.sqrt(a*a + b*b);
-            document.getElementById('result').textContent = c.toFixed(2);
+        // Константы
+        const G = 6.67430e-11; // Гравитационная постоянная
+
+        // Основные планеты
+        const planets = [
+            { name: 'Меркурий', gm: 2.203178e13, radius: 2439.7 },
+            { name: 'Венера',   gm: 3.248586e14, radius: 6049.0 },
+            { name: 'Земля',    gm: 3.986004e14, radius: 6371.0 },
+            { name: 'Марс',     gm: 4.282831e13, radius: 3375.8 },
+            { name: 'Юпитер',   gm: 1.266865e17, radius: 69373.0 },
+            { name: 'Сатурн',   gm: 3.793119e16, radius: 57216.0 },
+            { name: 'Уран',     gm: 5.793940e15, radius: 24702.0 },
+            { name: 'Нептун',   gm: 6.836530e15, radius: 24085.0 },
+            { name: 'Плутон',   gm: 8.71e11,    radius: 1187.0 }
+        ];
+
+        // Спутники (группируем по родительским планетам)
+        const satellites = [
+            // Земля (индекс 2)
+            [
+                { name: 'Луна', gm: 4.9048695e12, radius: 1737.4 }
+            ],
+            
+            // Марс (индекс 3)
+            [
+                { name: 'Фобос', gm: 7.08e9, radius: 11.1 },
+                { name: 'Деймос', gm: 1.48e9, radius: 6.2 }
+            ],
+            
+            // Юпитер (индекс 4)
+            [
+                { name: 'Ио', gm: 5.959916e12, radius: 1821.6 },
+                { name: 'Европа', gm: 3.202739e12, radius: 1560.8 },
+                { name: 'Геймед', gm: 9.887819e12, radius: 2631.2 },
+                { name: 'Каллисто', gm: 7.179289e12, radius: 2410.3 }
+            ],
+            
+            // Сатурн (индекс 5)
+            [
+                { name: 'Мимас', gm: 2.503e9, radius: 198.2 },
+                { name: 'Энцелад', gm: 7.209e9, radius: 252.1 },
+                { name: 'Тефия', gm: 4.121e10, radius: 533.0 },
+                { name: 'Диона', gm: 7.311e10, radius: 561.7 },
+                { name: 'Рея', gm: 1.538e11, radius: 764.3 },
+                { name: 'Титан', gm: 8.978e12, radius: 2575.5 },
+                { name: 'Ёпта', gm: 1.205e11, radius: 735.6 }
+            ],
+            
+            // Уран (индекс 6)
+            [
+                { name: 'Миранда', gm: 4.4e9, radius: 235.8 },
+                { name: 'Ариэль', gm: 1.35e11, radius: 578.9 },
+                { name: 'Умбриэль', gm: 1.17e11, radius: 584.7 },
+                { name: 'Титания', gm: 2.37e11, radius: 788.9 },
+                { name: 'Оберон', gm: 2.01e11, radius: 761.4 }
+            ],
+            
+            // Нептун (индекс 7)
+            [
+                { name: 'Тритон', gm: 1.428e12, radius: 1353.4 }
+            ],
+            
+            // Плутон (индекс 8)
+            [
+                { name: 'Харон', gm: 1.058e11, radius: 606.0 }
+            ]
+        ];
+
+        // DOM элементы
+        const planetSelect = document.getElementById('planet');
+        const satelliteSelect = document.getElementById('satellite');
+        const satelliteGroup = document.getElementById('satellite-group');
+        const initOrbitInputs = document.getElementById('initOrbitInputs');
+        const targetOrbitInputs = document.getElementById('targetOrbitInputs');
+        const resultsDiv = document.getElementById('results');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const bodyElement = document.body;
+
+        // Инициализация приложения
+        function initApp() {
+            // Заполняем спутники для текущей планеты
+            updateSatellites();
+            
+            // Настройка обработчиков событий
+            planetSelect.addEventListener('change', updateSatellites);
+            document.querySelectorAll('input[name="initOrbit"]').forEach(radio => {
+                radio.addEventListener('change', updateOrbitInputs);
+            });
+            document.querySelectorAll('input[name="targetOrbit"]').forEach(radio => {
+                radio.addEventListener('change', updateOrbitInputs);
+            });
+            calculateBtn.addEventListener('click', calculate);
+            
+            // Обработка нажатия Enter
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    calculate();
+                }
+            });
+            
+            // Обработка переключения темы
+            themeToggle.addEventListener('change', toggleTheme);
+            
+            // Восстановление темы из localStorage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                themeToggle.checked = true;
+            }
         }
+
+        // Обновление списка спутников
+        function updateSatellites() {
+            const planetIndex = parseInt(planetSelect.value);
+            satelliteSelect.innerHTML = '<option value="-1">(Сама планета)</option>';
+            
+            // Планеты, имеющие спутники (индексы 2-8)
+            if (planetIndex >= 2 && planetIndex <= 8) {
+                const satGroup = satellites[planetIndex - 2];
+                satGroup.forEach((sat, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = sat.name;
+                    satelliteSelect.appendChild(option);
+                });
+                satelliteGroup.style.display = 'block';
+            } else {
+                satelliteGroup.style.display = 'none';
+            }
+        }
+
+        // Обновление полей ввода для орбит
+        function updateOrbitInputs() {
+            const initMethod = document.querySelector('input[name="initOrbit"]:checked').value;
+            const targetMethod = document.querySelector('input[name="targetOrbit"]:checked').value;
+            
+            // Обновляем начальную орбиту
+            initOrbitInputs.innerHTML = '';
+            if (initMethod === '0') {
+                initOrbitInputs.innerHTML = `
+                    <div class="orbit-inputs">
+                        <div class="form-group">
+                            <label for="periapsisInit">Перицентр (км):</label>
+                            <input type="number" id="periapsisInit" value="150">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="apoapsisInit">Апоцентр (км):</label>
+                            <input type="number" id="apoapsisInit" value="150">
+                        </div>
+                    </div>
+                `;
+            } else {
+                initOrbitInputs.innerHTML = `
+                    <div class="orbit-inputs">
+                        <div class="form-group">
+                            <label for="semiMajorAxisInit">Большая полуось (км):</label>
+                            <input type="number" id="semiMajorAxisInit" value="150">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eccentricityInit">Эксцентриситет:</label>
+                            <input type="number" id="eccentricityInit" value="0" step="0.01" min="0" max="0.99">
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Обновляем целевую орбиту
+            targetOrbitInputs.innerHTML = '';
+            if (targetMethod === '0') {
+                targetOrbitInputs.innerHTML = `
+                    <div class="orbit-inputs">
+                        <div class="form-group">
+                            <label for="periapsisTarget">Перицентр (км):</label>
+                            <input type="number" id="periapsisTarget" value="150">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="apoapsisTarget">Апоцентр (км):</label>
+                            <input type="number" id="apoapsisTarget" value="150">
+                        </div>
+                    </div>
+                `;
+            } else {
+                targetOrbitInputs.innerHTML = `
+                    <div class="orbit-inputs">
+                        <div class="form-group">
+                            <label for="semiMajorAxisTarget">Большая полуось (км):</label>
+                            <input type="number" id="semiMajorAxisTarget" value="150">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eccentricityTarget">Эксцентриситет:</label>
+                            <input type="number" id="eccentricityTarget" value="0" step="0.01" min="0" max="0.99">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Получение гравитационных параметров
+        function getGravityParams() {
+            const planetIndex = parseInt(planetSelect.value);
+            const satelliteIndex = parseInt(satelliteSelect.value);
+            
+            // Если выбран спутник
+            if (satelliteIndex >= 0) {
+                return {
+                    gm: satellites[planetIndex - 2][satelliteIndex].gm,
+                    radius: satellites[planetIndex - 2][satelliteIndex].radius * 1000
+                };
+            }
+            
+            // Если выбрана сама планета
+            return {
+                gm: planets[planetIndex].gm,
+                radius: planets[planetIndex].radius * 1000
+            };
+        }
+
+        // Основная функция расчёта
+        function calculate() {
+            try {
+                // Получаем параметры небесного тела
+                const { gm, radius: planetRadius } = getGravityParams();
+                
+                // Получаем параметры начальной орбиты
+                const initMethod = document.querySelector('input[name="initOrbit"]:checked').value;
+                let rPeriInit, rApoInit;
+                
+                if (initMethod === '0') {
+                    rPeriInit = parseFloat(document.getElementById('periapsisInit').value) * 1000 + planetRadius;
+                    rApoInit = parseFloat(document.getElementById('apoapsisInit').value) * 1000 + planetRadius;
+                } else {
+                    const semiMajor = parseFloat(document.getElementById('semiMajorAxisInit').value) * 1000;
+                    const ecc = parseFloat(document.getElementById('eccentricityInit').value);
+                    rPeriInit = semiMajor * (1 - ecc) + planetRadius;
+                    rApoInit = semiMajor * (1 + ecc) + planetRadius;
+                }
+                
+                // Получаем параметры целевой орбиты
+                const targetMethod = document.querySelector('input[name="targetOrbit"]:checked').value;
+                let rPeriTarget, rApoTarget;
+                
+                if (targetMethod === '0') {
+                    rPeriTarget = parseFloat(document.getElementById('periapsisTarget').value) * 1000 + planetRadius;
+                    rApoTarget = parseFloat(document.getElementById('apoapsisTarget').value) * 1000 + planetRadius;
+                } else {
+                    const semiMajor = parseFloat(document.getElementById('semiMajorAxisTarget').value) * 1000;
+                    const ecc = parseFloat(document.getElementById('eccentricityTarget').value);
+                    rPeriTarget = semiMajor * (1 - ecc) + planetRadius;
+                    rApoTarget = semiMajor * (1 + ecc) + planetRadius;
+                }
+                
+                // Проверка параметров орбит
+                if (rPeriInit <= planetRadius || rApoInit <= planetRadius || 
+                    rPeriTarget <= planetRadius || rApoTarget <= planetRadius) {
+                    throw new Error('Высота орбиты не может быть меньше радиуса небесного тела');
+                }
+                
+                // Рассчитываем характеристики орбит
+                const vPeriTarget = Math.sqrt(gm * (2 / rPeriTarget - 2 / (rPeriTarget + rApoTarget)));
+                const vApoTarget = Math.sqrt(gm * (2 / rApoTarget - 2 / (rPeriTarget + rApoTarget)));
+                const period = 2 * Math.PI * Math.sqrt(Math.pow((rPeriTarget + rApoTarget) / 2, 3) / gm);
+                
+                // Определяем тип манёвра
+                let deltaV, impulses;
+                let details = '';
+                
+                if (Math.abs(rPeriInit - rPeriTarget) < 1) {
+                    // Перицентры совпадают
+                    impulses = 1;
+                    const vInit = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoInit)));
+                    const vTarget = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoTarget)));
+                    deltaV = vTarget - vInit;
+                    details = `ΔV: ${deltaV.toFixed(2)} м/с (${getBurnType(deltaV)} в перицентре)\n`;
+                } else if (Math.abs(rApoInit - rApoTarget) < 1) {
+                    // Апоцентры совпадают
+                    impulses = 1;
+                    const vInit = Math.sqrt(gm * (2 / rApoInit - 2 / (rPeriInit + rApoInit)));
+                    const vTarget = Math.sqrt(gm * (2 / rApoInit - 2 / (rPeriTarget + rApoInit)));
+                    deltaV = vTarget - vInit;
+                    details = `ΔV: ${deltaV.toFixed(2)} м/с (${getBurnType(deltaV)} в апоцентре)\n`;
+                } else {
+                    // Двухимпульсный переход
+                    impulses = 2;
+                    const vInitPeri = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoInit)));
+                    const vTransferPeri = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoTarget)));
+                    const deltaV1 = vTransferPeri - vInitPeri;
+                    
+                    const vTransferApo = Math.sqrt(gm * (2 / rApoTarget - 2 / (rPeriInit + rApoTarget)));
+                    const vTargetApo = Math.sqrt(gm * (2 / rApoTarget - 2 / (rPeriTarget + rApoTarget)));
+                    const deltaV2 = vTargetApo - vTransferApo;
+                    
+                    deltaV = Math.abs(deltaV1) + Math.abs(deltaV2);
+                    details = `ΔV1: ${deltaV1.toFixed(2)} м/с (в перицентре)\n`;
+                    details += `ΔV2: ${deltaV2.toFixed(2)} м/с (в апоцентре)\n`;
+                    details += `Общий ΔV: ${deltaV.toFixed(2)} м/с\n`;
+                }
+                
+                // Форматируем результаты
+                let result = `==== РЕЗУЛЬТАТЫ РАСЧЁТА ====\n\n`;
+                result += `Небесное тело: ${getSelectedBodyName()}\n`;
+                result += `Гравитационный параметр (GM): ${gm.toExponential(3)} м³/с²\n`;
+                result += `Радиус: ${(planetRadius / 1000).toFixed(1)} км\n\n`;
+                result += `Тип манёвра: ${impulses === 1 ? 'Одноимпульсный' : 'Двухимпульсный'}\n`;
+                result += details;
+                result += '\n==== ХАРАКТЕРИСТИКИ ЦЕЛЕВОЙ ОРБИТЫ ====\n\n';
+                result += `Скорость в перицентре: ${vPeriTarget.toFixed(2)} м/с\n`;
+                result += `Скорость в апоцентре: ${vApoTarget.toFixed(2)} м/с\n`;
+                result += `Период обращения: ${(period / 60).toFixed(2)} мин\n`;
+                
+                resultsDiv.textContent = result;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<span class="error">Ошибка: ${error.message}</span>`;
+            }
+        }
+
+        // Получение названия выбранного небесного тела
+        function getSelectedBodyName() {
+            const planetIndex = parseInt(planetSelect.value);
+            const satelliteIndex = parseInt(satelliteSelect.value);
+            
+            if (satelliteIndex >= 0) {
+                return satellites[planetIndex - 2][satelliteIndex].name;
+            }
+            
+            return planets[planetIndex].name;
+        }
+
+        // Определение типа манёвра
+        function getBurnType(deltaV) {
+            return deltaV > 0 ? 'разгон' : 'торможение';
+        }
+
+        // Переключение темы
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            // Сохраняем выбор в localStorage
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Управление боковым меню
+        function openNav() {
+            document.getElementById("mySidebar").style.width = "300px";
+            bodyElement.classList.add('sidebar-open');
+        }
+
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            bodyElement.classList.remove('sidebar-open');
+        }
+
+        // Инициализация приложения при загрузке
+        window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
