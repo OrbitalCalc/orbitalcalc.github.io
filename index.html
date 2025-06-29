@@ -4,7 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orbital Calculator</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <style>
+        /* Подключение шрифта */
+        @font-face {
+            font-family: 'Bulatov SP Demo';
+            src: url('fonts/BulatovSPDemo.woff2') format('woff2'),
+                 url('fonts/BulatovSPDemo.woff') format('woff'),
+                 url('fonts/BulatovSPDemo.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
             /* Тёмная тема (более тёмная) */
             --primary: #1a1a2e;
@@ -46,10 +58,12 @@
             margin: 0;
             padding: 0;
             transition: background-color 0.3s, color 0.3s, transform 0.3s, opacity 0.3s;
+            font-family: 'Bulatov SP Demo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        /* Остальные стили без изменений... */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Bulatov SP Demo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background);
             color: var(--text);
             line-height: 1.6;
