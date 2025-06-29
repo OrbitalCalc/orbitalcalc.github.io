@@ -31,7 +31,7 @@
             /* Тёмная тема (более тёмная) */
             --primary: #1a1a2e;
             --secondary: #16213e;
-            --accent: #8a89c0;
+            --accent: #0400ff;
             --background: #0d0d17;
             --card: #1a1a2e;
             --text: #e0e0e0;
@@ -47,11 +47,11 @@
 
         .light-theme {
             /* Обновлённая светлая тема в оливковых тонах */
-            --primary: #f8f9f0;
-            --secondary: #eef0e1;
-            --accent: #636B2F;
+            --primary: #eef3c8;
+            --secondary: #e5f38b;
+            --accent: #5a7e05;
             --background: #f2f4e7;
-            --card: #ffffff;
+            --card: #e8f5d0;
             --text: #333333;
             --error: #c44d58;
             --header-bg: #f0f2e1;
@@ -247,21 +247,6 @@
             margin: 0;
         }
 
-        .radio-group {
-            margin-bottom: 20px;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .radio-option input {
-            width: auto;
-            margin-right: 10px;
-        }
-
         .orbit-inputs {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -294,12 +279,12 @@
             background-color: var(--results-bg);
             padding: 20px;
             border-radius: 12px;
-            min-height: 300px;
-            white-space: pre-line;
-            font-family: monospace;
+            min-height: 100px;
             overflow: auto;
             max-height: 500px;
             border: 1px solid var(--border);
+            font-family: monospace;
+            white-space: pre-line;
         }
 
         .error {
@@ -487,6 +472,39 @@
             margin-top: 40px;
             padding: 0 15px;
         }
+
+        /* Стили для вывода характеристик */
+        .orbit-characteristics {
+            background-color: var(--results-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+        }
+
+        .characteristic-item {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .characteristic-label {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Параметры небесного тела в одну линию */
+        .celestial-body-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Специальные символы с обычным шрифтом */
+        .symbol {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
     </style>
 </head>
 <body class="dark-theme">
@@ -529,54 +547,43 @@
         <div class="card">
             <h2 class="card-title">Параметры небесного тела</h2>
             
-            <div class="form-group">
-                <label for="planet">Планета:</label>
-                <select id="planet">
-                    <option value="0">Меркурий</option>
-                    <option value="1">Венера</option>
-                    <option value="2" selected>Земля</option>
-                    <option value="3">Марс</option>
-                    <option value="4">Юпитер</option>
-                    <option value="5">Сатурн</option>
-                    <option value="6">Уран</option>
-                    <option value="7">Нептун</option>
-                    <option value="8">Плутон</option>
-                </select>
-            </div>
-            
-            <div class="form-group" id="satellite-group">
-                <label for="satellite">Спутник:</label>
-                <select id="satellite">
-                    <option value="-1">(Сама планета)</option>
-                </select>
+            <div class="celestial-body-group">
+                <div class="form-group">
+                    <label for="planet">Планета:</label>
+                    <select id="planet">
+                        <option value="0">Меркурий</option>
+                        <option value="1">Венера</option>
+                        <option value="2" selected>Земля</option>
+                        <option value="3">Марс</option>
+                        <option value="4">Юпитер</option>
+                        <option value="5">Сатурн</option>
+                        <option value="6">Уран</option>
+                        <option value="7">Нептун</option>
+                        <option value="8">Плутон</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="satellite-group">
+                    <label for="satellite">Спутник:</label>
+                    <select id="satellite">
+                        <option value="-1">(Сама планета)</option>
+                    </select>
+                </div>
             </div>
         </div>
         
         <div class="card">
             <h2 class="card-title">Начальная орбита</h2>
             
-            <div class="radio-group">
-                <div class="radio-option">
-                    <input type="radio" id="initMethod1" name="initOrbit" value="0" checked>
-                    <label for="initMethod1">Перицентр + апоцентр</label>
+            <div class="orbit-inputs">
+                <div class="form-group">
+                    <label for="periapsisInit">Перицентр (км):</label>
+                    <input type="number" id="periapsisInit" value="150">
                 </div>
-                <div class="radio-option">
-                    <input type="radio" id="initMethod2" name="initOrbit" value="1">
-                    <label for="initMethod2">Большая полуось + эксцентриситет</label>
-                </div>
-            </div>
-            
-            <div id="initOrbitInputs">
-                <div class="orbit-inputs">
-                    <div class="form-group">
-                        <label for="periapsisInit">Перицентр (км):</label>
-                        <input type="number" id="periapsisInit" value="150">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="apoapsisInit">Апоцентр (км):</label>
-                        <input type="number" id="apoapsisInit" value="150">
-                    </div>
+                
+                <div class="form-group">
+                    <label for="apoapsisInit">Апоцентр (км):</label>
+                    <input type="number" id="apoapsisInit" value="150">
                 </div>
             </div>
         </div>
@@ -584,28 +591,31 @@
         <div class="card">
             <h2 class="card-title">Целевая орбита</h2>
             
-            <div class="radio-group">
-                <div class="radio-option">
-                    <input type="radio" id="targetMethod1" name="targetOrbit" value="0" checked>
-                    <label for="targetMethod1">Перицентр + апоцентр</label>
+            <div class="orbit-inputs">
+                <div class="form-group">
+                    <label for="periapsisTarget">Перицентр (км):</label>
+                    <input type="number" id="periapsisTarget" value="150">
                 </div>
-                <div class="radio-option">
-                    <input type="radio" id="targetMethod2" name="targetOrbit" value="1">
-                    <label for="targetMethod2">Большая полуось + эксцентриситет</label>
+                
+                <div class="form-group">
+                    <label for="apoapsisTarget">Апоцентр (км):</label>
+                    <input type="number" id="apoapsisTarget" value="150">
                 </div>
             </div>
             
-            <div id="targetOrbitInputs">
-                <div class="orbit-inputs">
-                    <div class="form-group">
-                        <label for="periapsisTarget">Перицентр (км):</label>
-                        <input type="number" id="periapsisTarget" value="150">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="apoapsisTarget">Апоцентр (км):</label>
-                        <input type="number" id="apoapsisTarget" value="150">
-                    </div>
+            <!-- Блок для характеристик целевой орбиты -->
+            <div id="targetCharacteristics" class="orbit-characteristics">
+                <div class="characteristic-item">
+                    <span class="characteristic-label">Скорость в перицентре:</span>
+                    <span id="vPeriTarget">-</span>
+                </div>
+                <div class="characteristic-item">
+                    <span class="characteristic-label">Скорость в апоцентре:</span>
+                    <span id="vApoTarget">-</span>
+                </div>
+                <div class="characteristic-item">
+                    <span class="characteristic-label">Период обращения:</span>
+                    <span id="periodTarget">-</span>
                 </div>
             </div>
         </div>
@@ -618,7 +628,7 @@
     </div>
     
     <footer>
-        Orbital Calculator &copy; 1917 | Вагинальный Голкипер
+        Orbital Calculator <span class="symbol">©</span> 1917 | Вагинальный Голкипер
     </footer>
 
     <script>
@@ -694,14 +704,17 @@
         const planetSelect = document.getElementById('planet');
         const satelliteSelect = document.getElementById('satellite');
         const satelliteGroup = document.getElementById('satellite-group');
-        const initOrbitInputs = document.getElementById('initOrbitInputs');
-        const targetOrbitInputs = document.getElementById('targetOrbitInputs');
         const resultsDiv = document.getElementById('results');
         const calculateBtn = document.getElementById('calculateBtn');
         const themeToggle = document.getElementById('themeToggle');
         const bodyElement = document.body;
         const container = document.querySelector('.container');
         const orderToggle = document.getElementById('orderToggle');
+        
+        // Элементы характеристик целевой орбиты
+        const vPeriTarget = document.getElementById('vPeriTarget');
+        const vApoTarget = document.getElementById('vApoTarget');
+        const periodTarget = document.getElementById('periodTarget');
 
         // Изменение порядка блоков
         function changeBlockOrder(order) {
@@ -742,12 +755,6 @@
             
             // Настройка обработчиков событий
             planetSelect.addEventListener('change', updateSatellites);
-            document.querySelectorAll('input[name="initOrbit"]').forEach(radio => {
-                radio.addEventListener('change', updateOrbitInputs);
-            });
-            document.querySelectorAll('input[name="targetOrbit"]').forEach(radio => {
-                radio.addEventListener('change', updateOrbitInputs);
-            });
             calculateBtn.addEventListener('click', calculate);
             
             // Обработка нажатия Enter
@@ -797,76 +804,6 @@
             }
         }
 
-        // Обновление полей ввода для орбит
-        function updateOrbitInputs() {
-            const initMethod = document.querySelector('input[name="initOrbit"]:checked').value;
-            const targetMethod = document.querySelector('input[name="targetOrbit"]:checked').value;
-            
-            // Обновляем начальную орбиту
-            initOrbitInputs.innerHTML = '';
-            if (initMethod === '0') {
-                initOrbitInputs.innerHTML = `
-                    <div class="orbit-inputs">
-                        <div class="form-group">
-                            <label for="periapsisInit">Перицентр (км):</label>
-                            <input type="number" id="periapsisInit" value="150">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="apoapsisInit">Апоцентр (км):</label>
-                            <input type="number" id="apoapsisInit" value="150">
-                        </div>
-                    </div>
-                `;
-            } else {
-                initOrbitInputs.innerHTML = `
-                    <div class="orbit-inputs">
-                        <div class="form-group">
-                            <label for="semiMajorAxisInit">Большая полуось (км):</label>
-                            <input type="number" id="semiMajorAxisInit" value="150">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="eccentricityInit">Эксцентриситет:</label>
-                            <input type="number" id="eccentricityInit" value="0" step="0.01" min="0" max="0.99">
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Обновляем целевую орбиту
-            targetOrbitInputs.innerHTML = '';
-            if (targetMethod === '0') {
-                targetOrbitInputs.innerHTML = `
-                    <div class="orbit-inputs">
-                        <div class="form-group">
-                            <label for="periapsisTarget">Перицентр (км):</label>
-                            <input type="number" id="periapsisTarget" value="150">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="apoapsisTarget">Апоцентр (км):</label>
-                            <input type="number" id="apoapsisTarget" value="150">
-                        </div>
-                    </div>
-                `;
-            } else {
-                targetOrbitInputs.innerHTML = `
-                    <div class="orbit-inputs">
-                        <div class="form-group">
-                            <label for="semiMajorAxisTarget">Большая полуось (км):</label>
-                            <input type="number" id="semiMajorAxisTarget" value="150">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="eccentricityTarget">Эксцентриситет:</label>
-                            <input type="number" id="eccentricityTarget" value="0" step="0.01" min="0" max="0.99">
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
         // Получение гравитационных параметров
         function getGravityParams() {
             const planetIndex = parseInt(planetSelect.value);
@@ -894,32 +831,12 @@
                 const { gm, radius: planetRadius } = getGravityParams();
                 
                 // Получаем параметры начальной орбиты
-                const initMethod = document.querySelector('input[name="initOrbit"]:checked').value;
-                let rPeriInit, rApoInit;
-                
-                if (initMethod === '0') {
-                    rPeriInit = parseFloat(document.getElementById('periapsisInit').value) * 1000 + planetRadius;
-                    rApoInit = parseFloat(document.getElementById('apoapsisInit').value) * 1000 + planetRadius;
-                } else {
-                    const semiMajor = parseFloat(document.getElementById('semiMajorAxisInit').value) * 1000;
-                    const ecc = parseFloat(document.getElementById('eccentricityInit').value);
-                    rPeriInit = semiMajor * (1 - ecc) + planetRadius;
-                    rApoInit = semiMajor * (1 + ecc) + planetRadius;
-                }
+                let rPeriInit = parseFloat(document.getElementById('periapsisInit').value) * 1000 + planetRadius;
+                let rApoInit = parseFloat(document.getElementById('apoapsisInit').value) * 1000 + planetRadius;
                 
                 // Получаем параметры целевой орбиты
-                const targetMethod = document.querySelector('input[name="targetOrbit"]:checked').value;
-                let rPeriTarget, rApoTarget;
-                
-                if (targetMethod === '0') {
-                    rPeriTarget = parseFloat(document.getElementById('periapsisTarget').value) * 1000 + planetRadius;
-                    rApoTarget = parseFloat(document.getElementById('apoapsisTarget').value) * 1000 + planetRadius;
-                } else {
-                    const semiMajor = parseFloat(document.getElementById('semiMajorAxisTarget').value) * 1000;
-                    const ecc = parseFloat(document.getElementById('eccentricityTarget').value);
-                    rPeriTarget = semiMajor * (1 - ecc) + planetRadius;
-                    rApoTarget = semiMajor * (1 + ecc) + planetRadius;
-                }
+                let rPeriTarget = parseFloat(document.getElementById('periapsisTarget').value) * 1000 + planetRadius;
+                let rApoTarget = parseFloat(document.getElementById('apoapsisTarget').value) * 1000 + planetRadius;
                 
                 // Проверка параметров орбит
                 if (rPeriInit <= planetRadius || rApoInit <= planetRadius || 
@@ -927,32 +844,40 @@
                     throw new Error('Высота орбиты не может быть меньше радиуса небесного тела');
                 }
                 
-                // Рассчитываем характеристики орбит
-                const vPeriTarget = Math.sqrt(gm * (2 / rPeriTarget - 2 / (rPeriTarget + rApoTarget)));
-                const vApoTarget = Math.sqrt(gm * (2 / rApoTarget - 2 / (rPeriTarget + rApoTarget)));
-                const period = 2 * Math.PI * Math.sqrt(Math.pow((rPeriTarget + rApoTarget) / 2, 3) / gm);
+                // Рассчитываем характеристики целевой орбиты
+                const vPeriTargetVal = Math.sqrt(gm * (2 / rPeriTarget - 2 / (rPeriTarget + rApoTarget)));
+                const vApoTargetVal = Math.sqrt(gm * (2 / rApoTarget - 2 / (rPeriTarget + rApoTarget)));
+                const periodVal = 2 * Math.PI * Math.sqrt(Math.pow((rPeriTarget + rApoTarget) / 2, 3) / gm);
                 
-                // Определяем тип манёвра
-                let deltaV, impulses;
-                let details = '';
+                // Обновляем характеристики целевой орбиты
+                vPeriTarget.textContent = `${vPeriTargetVal.toFixed(2)} м/с`;
+                vApoTarget.textContent = `${vApoTargetVal.toFixed(2)} м/с`;
+                periodTarget.textContent = `${(periodVal / 60).toFixed(2)} мин`;
+                
+                // Форматируем результаты
+                let result = `==== РЕЗУЛЬТАТЫ РАСЧЁТА ====\n\n`;
+                result += `Тип манёвра: ${Math.abs(rPeriInit - rPeriTarget) < 1 || Math.abs(rApoInit - rApoTarget) < 1 ? 'Одноимпульсный' : 'Двухимпульсный'}\n`;
                 
                 if (Math.abs(rPeriInit - rPeriTarget) < 1) {
                     // Перицентры совпадают
-                    impulses = 1;
                     const vInit = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoInit)));
                     const vTarget = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoTarget)));
-                    deltaV = vTarget - vInit;
-                    details = `ΔV: ${deltaV.toFixed(2)} м/с (${getBurnType(deltaV)} в перицентре)\n`;
+                    const deltaV = vTarget - vInit;
+                    
+                    result += `\nΔV: ${formatDeltaV(deltaV)} м/с\n`;
+                    result += `Точка импульса: перицентр\n`;
+                    
                 } else if (Math.abs(rApoInit - rApoTarget) < 1) {
                     // Апоцентры совпадают
-                    impulses = 1;
                     const vInit = Math.sqrt(gm * (2 / rApoInit - 2 / (rPeriInit + rApoInit)));
                     const vTarget = Math.sqrt(gm * (2 / rApoInit - 2 / (rPeriTarget + rApoInit)));
-                    deltaV = vTarget - vInit;
-                    details = `ΔV: ${deltaV.toFixed(2)} м/с (${getBurnType(deltaV)} в апоцентре)\n`;
+                    const deltaV = vTarget - vInit;
+                    
+                    result += `\nΔV: ${formatDeltaV(deltaV)} м/с\n`;
+                    result += `Точка импульса: апоцентр\n`;
+                    
                 } else {
                     // Двухимпульсный переход
-                    impulses = 2;
                     const vInitPeri = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoInit)));
                     const vTransferPeri = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoTarget)));
                     const deltaV1 = vTransferPeri - vInitPeri;
@@ -961,46 +886,31 @@
                     const vTargetApo = Math.sqrt(gm * (2 / rApoTarget - 2 / (rPeriTarget + rApoTarget)));
                     const deltaV2 = vTargetApo - vTransferApo;
                     
-                    deltaV = Math.abs(deltaV1) + Math.abs(deltaV2);
-                    details = `ΔV1: ${deltaV1.toFixed(2)} м/с (в перицентре)\n`;
-                    details += `ΔV2: ${deltaV2.toFixed(2)} м/с (в апоцентре)\n`;
-                    details += `Общий ΔV: ${deltaV.toFixed(2)} м/с\n`;
+                    const totalDeltaV = Math.abs(deltaV1) + Math.abs(deltaV2);
+                    
+                    result += `\nИмпульс 1 (перицентр): ${formatDeltaV(deltaV1)} м/с\n`;
+                    result += `Импульс 2 (апоцентр): ${formatDeltaV(deltaV2)} м/с\n`;
+                    result += `\nОбщий <span class="symbol">Δ</span>V: ${totalDeltaV.toFixed(2)} м/с\n`;
                 }
                 
-                // Форматируем результаты
-                let result = `==== РЕЗУЛЬТАТЫ РАСЧЁТА ====\n\n`;
-                result += `Небесное тело: ${getSelectedBodyName()}\n`;
-                result += `Гравитационный параметр (GM): ${gm.toExponential(3)} м³/с²\n`;
-                result += `Радиус: ${(planetRadius / 1000).toFixed(1)} км\n\n`;
-                result += `Тип манёвра: ${impulses === 1 ? 'Одноимпульсный' : 'Двухимпульсный'}\n`;
-                result += details;
-                result += '\n==== ХАРАКТЕРИСТИКИ ЦЕЛЕВОЙ ОРБИТЫ ====\n\n';
-                result += `Скорость в перицентре: ${vPeriTarget.toFixed(2)} м/с\n`;
-                result += `Скорость в апоцентре: ${vApoTarget.toFixed(2)} м/с\n`;
-                result += `Период обращения: ${(period / 60).toFixed(2)} мин\n`;
-                
-                resultsDiv.textContent = result;
+                resultsDiv.innerHTML = result;
                 
             } catch (error) {
                 resultsDiv.innerHTML = `<span class="error">Ошибка: ${error.message}</span>`;
+                // Сбрасываем характеристики при ошибке
+                vPeriTarget.textContent = '-';
+                vApoTarget.textContent = '-';
+                periodTarget.textContent = '-';
             }
         }
 
-        // Получение названия выбранного небесного тела
-        function getSelectedBodyName() {
-            const planetIndex = parseInt(planetSelect.value);
-            const satelliteIndex = parseInt(satelliteSelect.value);
-            
-            if (satelliteIndex >= 0) {
-                return satellites[planetIndex - 2][satelliteIndex].name;
+        // Форматирование ΔV
+        function formatDeltaV(value) {
+            if (value >= 0) {
+                return `<span style="color: #4caf50">+${value.toFixed(2)}</span>`;
+            } else {
+                return `<span style="color: #f44336">${value.toFixed(2)}</span>`;
             }
-            
-            return planets[planetIndex].name;
-        }
-
-        // Определение типа манёвра
-        function getBurnType(deltaV) {
-            return deltaV > 0 ? 'разгон' : ' торможение';
         }
 
         // Переключение темы
