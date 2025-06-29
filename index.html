@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orbital Calculator | Расчёт орбитальных манёвров</title>
+    <title>Orbital Calculator | Расчёт орбитальных переходов</title>
     
     <!-- Favicon Configuration -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -15,7 +15,9 @@
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
 
-    <!-- Подключение шрифта GOST -->
+    <!-- Подключение шрифтов -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <style>
         @font-face {
             font-family: 'GOST';
@@ -43,6 +45,8 @@
             --toggle-bg: #4a4a8a;
             --toggle-handle: #5c6bc0;
             --border: #2d2d4d;
+            --russian-font: 'GOST', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --english-font: 'Orbitron', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .light-theme {
@@ -68,11 +72,10 @@
             margin: 0;
             padding: 0;
             transition: background-color 0.3s, color 0.3s, transform 0.3s, opacity 0.3s;
-            font-family: 'GOST', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--russian-font); /* Применяем ГОСТ по умолчанию ко всем элементам */
         }
 
         body {
-            font-family: 'GOST', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background);
             color: var(--text);
             line-height: 1.6;
@@ -80,6 +83,32 @@
             max-width: 1200px;
             margin: 0 auto;
             position: relative;
+        }
+
+        body.english {
+            font-family: var(--english-font); /* Orbitron для английской версии */
+        }
+
+        body.english * {
+            font-family: var(--english-font) !important; /* Принудительно для всех дочерних элементов */
+        }
+
+        /* Специальные символы - сохраняем системный шрифт */
+        .symbol {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body.english .symbol {
+            font-family: var(--english-font); /* Для английской версии символы в Orbitron */
+        }
+
+        /* Элементы форм */
+        select, input, textarea, button, option {
+            font-family: inherit !important; /* Наследуем основной шрифт */
+        }
+
+        /* Результаты расчёта - моноширинный шрифт */
+        .results {
+            font-family: monospace;
         }
 
         header {
@@ -283,7 +312,6 @@
             overflow: auto;
             max-height: 500px;
             border: 1px solid var(--border);
-            font-family: monospace;
             white-space: pre-line;
         }
 
@@ -456,8 +484,22 @@
             margin-bottom: 10px;
             color: var(--text);
         }
+        
+        /* Стили для переключателя языка */
+        .language-switch {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
 
-        #orderToggle {
+        .language-label {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        #orderToggle, #languageToggle {
             width: 100%;
             padding: 10px;
             background: var(--card);
@@ -500,11 +542,6 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-
-        /* Специальные символы с обычным шрифтом */
-        .symbol {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
     </style>
 </head>
 <body class="dark-theme">
@@ -532,6 +569,15 @@
                     <option value="wide-first">Параметры тела сверху</option>
                 </select>
             </div>
+            
+            <!-- Переключатель языка -->
+            <div class="language-switch">
+                <span class="language-label">Язык:</span>
+                <select id="languageToggle">
+                    <option value="ru">Человеческий</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -539,17 +585,17 @@
     <button class="openbtn" onclick="openNav()">☰</button>
 
     <header>
-        <h1>Orbital Calculator</h1>
-        <div class="subtitle">Расчёт манёвров перехода для RSS</div>
+        <h1 id="appTitle">Orbital Calculator</h1>
+        <div class="subtitle" id="appSubtitle">Расчёт орбитальных переходов для RSS</div>
     </header>
     
     <div class="container default">
         <div class="card">
-            <h2 class="card-title">Параметры небесного тела</h2>
+            <h2 class="card-title" id="bodyParamsTitle">Параметры небесного тела</h2>
             
             <div class="celestial-body-group">
                 <div class="form-group">
-                    <label for="planet">Планета:</label>
+                    <label for="planet" id="planetLabel">Планета:</label>
                     <select id="planet">
                         <option value="0">Меркурий</option>
                         <option value="1">Венера</option>
@@ -564,7 +610,7 @@
                 </div>
                 
                 <div class="form-group" id="satellite-group">
-                    <label for="satellite">Спутник:</label>
+                    <label for="satellite" id="satelliteLabel">Спутник:</label>
                     <select id="satellite">
                         <option value="-1">(Сама планета)</option>
                     </select>
@@ -573,32 +619,32 @@
         </div>
         
         <div class="card">
-            <h2 class="card-title">Начальная орбита</h2>
+            <h2 class="card-title" id="initialOrbitTitle">Начальная орбита</h2>
             
             <div class="orbit-inputs">
                 <div class="form-group">
-                    <label for="periapsisInit">Перицентр (км):</label>
+                    <label for="periapsisInit" id="periapsisInitLabel">Перицентр (км):</label>
                     <input type="number" id="periapsisInit" value="150">
                 </div>
                 
                 <div class="form-group">
-                    <label for="apoapsisInit">Апоцентр (км):</label>
+                    <label for="apoapsisInit" id="apoapsisInitLabel">Апоцентр (км):</label>
                     <input type="number" id="apoapsisInit" value="150">
                 </div>
             </div>
         </div>
         
         <div class="card">
-            <h2 class="card-title">Целевая орбита</h2>
+            <h2 class="card-title" id="targetOrbitTitle">Целевая орбита</h2>
             
             <div class="orbit-inputs">
                 <div class="form-group">
-                    <label for="periapsisTarget">Перицентр (км):</label>
+                    <label for="periapsisTarget" id="periapsisTargetLabel">Перицентр (км):</label>
                     <input type="number" id="periapsisTarget" value="150">
                 </div>
                 
                 <div class="form-group">
-                    <label for="apoapsisTarget">Апоцентр (км):</label>
+                    <label for="apoapsisTarget" id="apoapsisTargetLabel">Апоцентр (км):</label>
                     <input type="number" id="apoapsisTarget" value="150">
                 </div>
             </div>
@@ -606,29 +652,29 @@
             <!-- Блок для характеристик целевой орбиты -->
             <div id="targetCharacteristics" class="orbit-characteristics">
                 <div class="characteristic-item">
-                    <span class="characteristic-label">Скорость в перицентре:</span>
+                    <span class="characteristic-label" id="vPeriTargetLabel">Скорость в перицентре:</span>
                     <span id="vPeriTarget">-</span>
                 </div>
                 <div class="characteristic-item">
-                    <span class="characteristic-label">Скорость в апоцентре:</span>
+                    <span class="characteristic-label" id="vApoTargetLabel">Скорость в апоцентре:</span>
                     <span id="vApoTarget">-</span>
                 </div>
                 <div class="characteristic-item">
-                    <span class="characteristic-label">Период обращения:</span>
+                    <span class="characteristic-label" id="periodTargetLabel">Период обращения:</span>
                     <span id="periodTarget">-</span>
                 </div>
             </div>
         </div>
         
         <div class="card">
-            <h2 class="card-title">Результаты расчёта</h2>
+            <h2 class="card-title" id="resultsTitle">Результаты расчёта</h2>
             <div class="results" id="results">Введите параметры орбит и нажмите "Рассчитать"</div>
             <button id="calculateBtn">Рассчитать</button>
         </div>
     </div>
     
     <footer>
-        Orbital Calculator <span class="symbol">©</span> 1917 | Вагинальный Голкипер
+        Bong _Cat <span class="symbol">©</span> 1917 | Калькулятор орбитальных переходов
     </footer>
 
     <script>
@@ -637,68 +683,134 @@
 
         // Основные планеты
         const planets = [
-            { name: 'Меркурий', gm: 2.203178e13, radius: 2439.7 },
-            { name: 'Венера',   gm: 3.248586e14, radius: 6049.0 },
-            { name: 'Земля',    gm: 3.986004e14, radius: 6371.0 },
-            { name: 'Марс',     gm: 4.282831e13, radius: 3375.8 },
-            { name: 'Юпитер',   gm: 1.266865e17, radius: 69373.0 },
-            { name: 'Сатурн',   gm: 3.793119e16, radius: 57216.0 },
-            { name: 'Уран',     gm: 5.793940e15, radius: 24702.0 },
-            { name: 'Нептун',   gm: 6.836530e15, radius: 24085.0 },
-            { name: 'Плутон',   gm: 8.71e11,    radius: 1187.0 }
+            { name: 'Ртуть', name_en: 'Mercury', gm: 2.203178e13, radius: 2439.7 },
+            { name: 'Венера',   name_en: 'Athena',   gm: 3.248586e14, radius: 6049.0 },
+            { name: 'Земля',    name_en: 'Dirt',   gm: 3.986004e14, radius: 6371.0 },
+            { name: 'Марс',     name_en: 'Mars',    gm: 4.282831e13, radius: 3375.8 },
+            { name: 'Юпитер',   name_en: 'Jupiter', gm: 1.266865e17, radius: 69373.0 },
+            { name: 'Сатурн',   name_en: 'Saturn',  gm: 3.793119e16, radius: 57216.0 },
+            { name: 'Уран',     name_en: 'Ur Anus',  gm: 5.793940e15, radius: 24702.0 },
+            { name: 'Нептун',   name_en: 'Neptune', gm: 6.836530e15, radius: 24085.0 },
+            { name: 'Плутон',   name_en: 'Pluto',   gm: 8.71e11,     radius: 1187.0 }
         ];
 
         // Спутники
         const satellites = [
             // Земля (индекс 2)
             [
-                { name: 'Луна', gm: 4.9048695e12, radius: 1737.4 }
+                { name: 'Луна', name_en: 'Moon', gm: 4.9048695e12, radius: 1737.4 }
             ],
             
             // Марс (индекс 3)
             [
-                { name: 'Фобос', gm: 7.08e9, radius: 11.1 },
-                { name: 'Деймос', gm: 1.48e9, radius: 6.2 }
+                { name: 'Фобос', name_en: 'Phobos', gm: 7.08e9, radius: 11.1 },
+                { name: 'Деймос', name_en: 'Deimos', gm: 1.48e9, radius: 6.2 }
             ],
             
             // Юпитер (индекс 4)
             [
-                { name: 'Ио', gm: 5.959916e12, radius: 1821.6 },
-                { name: 'Гейропа', gm: 3.202739e12, radius: 1560.8 },
-                { name: 'Ганимед', gm: 9.887819e12, radius: 2631.2 },
-                { name: 'Каллисто', gm: 7.179289e12, radius: 2410.3 }
+                { name: 'Йоу', name_en: 'Yo', gm: 5.959916e12, radius: 1821.6 },
+                { name: 'Гейропа', name_en: 'Europa', gm: 3.202739e12, radius: 1560.8 },
+                { name: 'Ганимед', name_en: 'Gаymede', gm: 9.887819e12, radius: 2631.2 },
+                { name: 'Каллисто', name_en: 'Callisto', gm: 7.179289e12, radius: 2410.3 }
             ],
             
             // Сатурн (индекс 5)
             [
-                { name: 'Мимас', gm: 2.503e9, radius: 198.2 },
-                { name: 'Энцелад', gm: 7.209e9, radius: 252.1 },
-                { name: 'Тефия', gm: 4.121e10, radius: 533.0 },
-                { name: 'Диона', gm: 7.311e10, radius: 561.7 },
-                { name: 'Рея', gm: 1.538e11, radius: 764.3 },
-                { name: 'Тинатата', gm: 8.978e12, radius: 2575.5 },
-                { name: 'Япта', gm: 1.205e11, radius: 735.6 }
+                { name: 'Мимас', name_en: 'Mimas', gm: 2.503e9, radius: 198.2 },
+                { name: 'Энцелад', name_en: 'Enceladus', gm: 7.209e9, radius: 252.1 },
+                { name: 'Тефия', name_en: 'Tethys', gm: 4.121e10, radius: 533.0 },
+                { name: 'Диона', name_en: 'Dione', gm: 7.311e10, radius: 561.7 },
+                { name: 'Рея', name_en: 'Rhea', gm: 1.538e11, radius: 764.3 },
+                { name: 'Титан', name_en: 'Titan', gm: 8.978e12, radius: 2575.5 },
+                { name: 'Япта', name_en: 'Iapetus', gm: 1.205e11, radius: 735.6 }
             ],
             
             // Уран (индекс 6)
             [
-                { name: 'Миранда', gm: 4.4e9, radius: 235.8 },
-                { name: 'Ариэль', gm: 1.35e11, radius: 578.9 },
-                { name: 'Умбриэль', gm: 1.17e11, radius: 584.7 },
-                { name: 'Титания', gm: 2.37e11, radius: 788.9 },
-                { name: 'Оберон', gm: 2.01e11, radius: 761.4 }
+                { name: 'Миранда', name_en: 'Mirinda', gm: 4.4e9, radius: 235.8 },
+                { name: 'Ариэль', name_en: 'Ariel', gm: 1.35e11, radius: 578.9 },
+                { name: 'Умбриэль', name_en: 'Umbrella', gm: 1.17e11, radius: 584.7 },
+                { name: 'Титания', name_en: 'Titania', gm: 2.37e11, radius: 788.9 },
+                { name: 'Овертон', name_en: 'Oberon', gm: 2.01e11, radius: 761.4 }
             ],
             
             // Нептун (индекс 7)
             [
-                { name: 'Тритон', gm: 1.428e12, radius: 1353.4 }
+                { name: 'Тритон', name_en: 'Triton', gm: 1.428e12, radius: 1353.4 }
             ],
             
             // Плутон (индекс 8)
             [
-                { name: 'Харон', gm: 1.058e11, radius: 606.0 }
+                { name: 'Харон', name_en: 'Charon', gm: 1.058e11, radius: 606.0 }
             ]
         ];
+
+        // Тексты локализации
+        const translations = {
+            ru: {
+                appTitle: "Орбитальный Калькулятор",
+                appSubtitle: "Расчёт орбитальных переходов для RSS",
+                bodyParamsTitle: "Параметры небесного тела",
+                planetLabel: "Планета:",
+                satelliteLabel: "Спутник:",
+                initialOrbitTitle: "Начальная орбита",
+                periapsisInitLabel: "Перицентр (км):",
+                apoapsisInitLabel: "Апоцентр (км):",
+                targetOrbitTitle: "Целевая орбита",
+                periapsisTargetLabel: "Перицентр (км):",
+                apoapsisTargetLabel: "Апоцентр (км):",
+                vPeriTargetLabel: "Скорость в перицентре:",
+                vApoTargetLabel: "Скорость в апоцентре:",
+                periodTargetLabel: "Период обращения:",
+                resultsTitle: "Результаты расчёта",
+                calculateBtn: "Рассчитать",
+                resultsDefault: "Введите параметры орбит и нажмите \"Рассчитать\"",
+                orbitError: "Высота орбиты не может быть меньше радиуса небесного тела",
+                calculateError: "Ошибка: ",
+                themeLabelDark: "Тёмная тема",
+                themeLabelLight: "Светлая тема",
+                orderLabel: "Порядок блоков:",
+                languageLabel: "Язык:",
+                orderOptions: {
+                    default: "Стандартный",
+                    "results-top": "Результаты сверху",
+                    "target-top": "Целевая орбита сверху",
+                    "wide-first": "Параметры тела сверху"
+                }
+            },
+            en: {
+                appTitle: "Orbital Calculator",
+                appSubtitle: "Orbital maneuver calculation for RSS",
+                bodyParamsTitle: "Celestial Body Parameters",
+                planetLabel: "Planet:",
+                satelliteLabel: "Satellite:",
+                initialOrbitTitle: "Initial Orbit",
+                periapsisInitLabel: "Periapsis (km):",
+                apoapsisInitLabel: "Apoapsis (km):",
+                targetOrbitTitle: "Target Orbit",
+                periapsisTargetLabel: "Periapsis (km):",
+                apoapsisTargetLabel: "Apoapsis (km):",
+                vPeriTargetLabel: "Velocity at periapsis:",
+                vApoTargetLabel: "Velocity at apoapsis:",
+                periodTargetLabel: "Orbital period:",
+                resultsTitle: "Calculation Results",
+                calculateBtn: "Calculate",
+                resultsDefault: "Enter orbit parameters and click \"Calculate\"",
+                orbitError: "Orbit height cannot be less than celestial body radius",
+                calculateError: "Error: ",
+                themeLabelDark: "Dark theme",
+                themeLabelLight: "Light theme",
+                orderLabel: "Block order:",
+                languageLabel: "Language:",
+                orderOptions: {
+                    default: "Default",
+                    "results-top": "Results on top",
+                    "target-top": "Target orbit on top",
+                    "wide-first": "Body parameters on top"
+                }
+            }
+        };
 
         // DOM элементы
         const planetSelect = document.getElementById('planet');
@@ -707,6 +819,7 @@
         const resultsDiv = document.getElementById('results');
         const calculateBtn = document.getElementById('calculateBtn');
         const themeToggle = document.getElementById('themeToggle');
+        const languageToggle = document.getElementById('languageToggle');
         const bodyElement = document.body;
         const container = document.querySelector('.container');
         const orderToggle = document.getElementById('orderToggle');
@@ -748,9 +861,110 @@
             }
         }
 
+        // Обновление текстов интерфейса
+        function updateUITexts(lang) {
+            const langData = translations[lang];
+            
+            // Обновляем заголовки и метки
+            document.getElementById('appTitle').textContent = langData.appTitle;
+            document.getElementById('appSubtitle').textContent = langData.appSubtitle;
+            document.getElementById('bodyParamsTitle').textContent = langData.bodyParamsTitle;
+            document.getElementById('planetLabel').textContent = langData.planetLabel;
+            document.getElementById('satelliteLabel').textContent = langData.satelliteLabel;
+            document.getElementById('initialOrbitTitle').textContent = langData.initialOrbitTitle;
+            document.getElementById('periapsisInitLabel').textContent = langData.periapsisInitLabel;
+            document.getElementById('apoapsisInitLabel').textContent = langData.apoapsisInitLabel;
+            document.getElementById('targetOrbitTitle').textContent = langData.targetOrbitTitle;
+            document.getElementById('periapsisTargetLabel').textContent = langData.periapsisTargetLabel;
+            document.getElementById('apoapsisTargetLabel').textContent = langData.apoapsisTargetLabel;
+            document.getElementById('vPeriTargetLabel').textContent = langData.vPeriTargetLabel;
+            document.getElementById('vApoTargetLabel').textContent = langData.vApoTargetLabel;
+            document.getElementById('periodTargetLabel').textContent = langData.periodTargetLabel;
+            document.getElementById('resultsTitle').textContent = langData.resultsTitle;
+            document.getElementById('calculateBtn').textContent = langData.calculateBtn;
+            document.querySelector('.theme-label:nth-child(1)').textContent = langData.themeLabelDark;
+            document.querySelector('.theme-label:nth-child(3)').textContent = langData.themeLabelLight;
+            document.querySelector('.order-label').textContent = langData.orderLabel;
+            document.querySelector('.language-label').textContent = langData.languageLabel;
+            
+            // Обновляем результаты по умолчанию
+            if (resultsDiv.textContent.includes("Введите") || 
+                resultsDiv.textContent.includes("Enter")) {
+                resultsDiv.textContent = langData.resultsDefault;
+            }
+            
+            // Обновляем опции порядка блоков
+            const orderOptions = langData.orderOptions;
+            Array.from(orderToggle.options).forEach(option => {
+                option.textContent = orderOptions[option.value];
+            });
+        }
+
+        // Обновление списка спутников
+        function updateSatellites() {
+            const planetIndex = parseInt(planetSelect.value);
+            const lang = localStorage.getItem('language') || 'ru';
+            satelliteSelect.innerHTML = '<option value="-1">' + 
+                (lang === 'ru' ? '(Сама планета)' : '(Planet itself)') + '</option>';
+            
+            // Планеты, имеющие спутники (индексы 2-8)
+            if (planetIndex >= 2 && planetIndex <= 8) {
+                const satGroup = satellites[planetIndex - 2];
+                satGroup.forEach((sat, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = lang === 'ru' ? sat.name : sat.name_en;
+                    satelliteSelect.appendChild(option);
+                });
+                satelliteGroup.style.display = 'block';
+            } else {
+                satelliteGroup.style.display = 'none';
+            }
+        }
+
+        // Обновление названий планет в выпадающем списке
+        function updatePlanetNames() {
+            const lang = localStorage.getItem('language') || 'ru';
+            const planetOptions = planetSelect.options;
+            
+            for (let i = 0; i < planetOptions.length; i++) {
+                const planetIndex = parseInt(planetOptions[i].value);
+                if (planetIndex >= 0 && planetIndex < planets.length) {
+                    planetOptions[i].textContent = lang === 'ru' ? 
+                        planets[planetIndex].name : 
+                        planets[planetIndex].name_en;
+                }
+            }
+        }
+
+        // Функция смены языка
+        function changeLanguage() {
+            const lang = languageToggle.value;
+            localStorage.setItem('language', lang);
+            
+            // Обновляем шрифт
+            if (lang === 'ru') {
+                bodyElement.classList.remove('english');
+            } else {
+                bodyElement.classList.add('english');
+            }
+            
+            // Обновляем тексты интерфейса
+            updateUITexts(lang);
+            
+            // Обновляем названия планет и спутников
+            updatePlanetNames();
+            updateSatellites();
+        }
+
         // Инициализация приложения
         function initApp() {
-            // Заполняем спутники для текущей планеты
+            // Восстановление языка
+            const savedLang = localStorage.getItem('language') || 'ru';
+            languageToggle.value = savedLang;
+            
+            // Обновляем названия сразу при загрузке
+            updatePlanetNames();
             updateSatellites();
             
             // Настройка обработчиков событий
@@ -767,6 +981,9 @@
             // Обработка переключения темы
             themeToggle.addEventListener('change', toggleTheme);
             
+            // Обработка переключения языка
+            languageToggle.addEventListener('change', changeLanguage);
+            
             // Обработка переключения порядка блоков
             orderToggle.addEventListener('change', () => changeBlockOrder());
             
@@ -782,26 +999,9 @@
             if (savedOrder) {
                 changeBlockOrder(savedOrder);
             }
-        }
-
-        // Обновление списка спутников
-        function updateSatellites() {
-            const planetIndex = parseInt(planetSelect.value);
-            satelliteSelect.innerHTML = '<option value="-1">(Сама планета)</option>';
             
-            // Планеты, имеющие спутники (индексы 2-8)
-            if (planetIndex >= 2 && planetIndex <= 8) {
-                const satGroup = satellites[planetIndex - 2];
-                satGroup.forEach((sat, index) => {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.textContent = sat.name;
-                    satelliteSelect.appendChild(option);
-                });
-                satelliteGroup.style.display = 'block';
-            } else {
-                satelliteGroup.style.display = 'none';
-            }
+            // Применяем сохраненный язык
+            changeLanguage();
         }
 
         // Получение гравитационных параметров
@@ -826,6 +1026,9 @@
 
         // Основная функция расчёта
         function calculate() {
+            const lang = localStorage.getItem('language') || 'ru';
+            const langData = translations[lang];
+            
             try {
                 // Получаем параметры небесного тела
                 const { gm, radius: planetRadius } = getGravityParams();
@@ -841,7 +1044,7 @@
                 // Проверка параметров орбит
                 if (rPeriInit <= planetRadius || rApoInit <= planetRadius || 
                     rPeriTarget <= planetRadius || rApoTarget <= planetRadius) {
-                    throw new Error('Высота орбиты не может быть меньше радиуса небесного тела');
+                    throw new Error(langData.orbitError);
                 }
                 
                 // Рассчитываем характеристики целевой орбиты
@@ -855,8 +1058,11 @@
                 periodTarget.textContent = `${(periodVal / 60).toFixed(2)} мин`;
                 
                 // Форматируем результаты
-                let result = `==== РЕЗУЛЬТАТЫ РАСЧЁТА ====\n\n`;
-                result += `Тип манёвра: ${Math.abs(rPeriInit - rPeriTarget) < 1 || Math.abs(rApoInit - rApoTarget) < 1 ? 'Одноимпульсный' : 'Двухимпульсный'}\n`;
+                let result = `==== ${lang === 'ru' ? 'РЕЗУЛЬТАТЫ РАСЧЁТА' : 'CALCULATION RESULTS'} ====\n\n`;
+                result += `${lang === 'ru' ? 'Тип манёвра' : 'Maneuver type'}: `;
+                result += (Math.abs(rPeriInit - rPeriTarget) < 1 || Math.abs(rApoInit - rApoTarget) < 1) 
+                    ? (lang === 'ru' ? 'Одноимпульсный' : 'Single-impulse') 
+                    : (lang === 'ru' ? 'Двухимпульсный' : 'Two-impulse') + '\n';
                 
                 if (Math.abs(rPeriInit - rPeriTarget) < 1) {
                     // Перицентры совпадают
@@ -864,8 +1070,8 @@
                     const vTarget = Math.sqrt(gm * (2 / rPeriInit - 2 / (rPeriInit + rApoTarget)));
                     const deltaV = vTarget - vInit;
                     
-                    result += `\nΔV: ${formatDeltaV(deltaV)} м/с\n`;
-                    result += `Точка импульса: перицентр\n`;
+                    result += `\n<span class="symbol">Δ</span>V: ${formatDeltaV(deltaV)} м/с\n`;
+                    result += `${lang === 'ru' ? 'Точка импульса' : 'Impulse point'}: ${lang === 'ru' ? 'перицентр' : 'periapsis'}\n`;
                     
                 } else if (Math.abs(rApoInit - rApoTarget) < 1) {
                     // Апоцентры совпадают
@@ -873,8 +1079,8 @@
                     const vTarget = Math.sqrt(gm * (2 / rApoInit - 2 / (rPeriTarget + rApoInit)));
                     const deltaV = vTarget - vInit;
                     
-                    result += `\nΔV: ${formatDeltaV(deltaV)} м/с\n`;
-                    result += `Точка импульса: апоцентр\n`;
+                    result += `\n<span class="symbol">Δ</span>V: ${formatDeltaV(deltaV)} м/с\n`;
+                    result += `${lang === 'ru' ? 'Точка импульса' : 'Impulse point'}: ${lang === 'ru' ? 'апоцентр' : 'apoapsis'}\n`;
                     
                 } else {
                     // Двухимпульсный переход
@@ -888,15 +1094,15 @@
                     
                     const totalDeltaV = Math.abs(deltaV1) + Math.abs(deltaV2);
                     
-                    result += `\nИмпульс 1 (перицентр): ${formatDeltaV(deltaV1)} м/с\n`;
-                    result += `Импульс 2 (апоцентр): ${formatDeltaV(deltaV2)} м/с\n`;
-                    result += `\nОбщий <span class="symbol">Δ</span>V: ${totalDeltaV.toFixed(2)} м/с\n`;
+                    result += `\n${lang === 'ru' ? 'Импульс 1 (перицентр)' : 'Impulse 1 (periapsis)'}: ${formatDeltaV(deltaV1)} м/с\n`;
+                    result += `${lang === 'ru' ? 'Импульс 2 (апоцентр)' : 'Impulse 2 (apoapsis)'}: ${formatDeltaV(deltaV2)} м/с\n`;
+                    result += `\n${lang === 'ru' ? 'Общий' : 'Total'} <span class="symbol">Δ</span>V: ${totalDeltaV.toFixed(2)} м/с\n`;
                 }
                 
                 resultsDiv.innerHTML = result;
                 
             } catch (error) {
-                resultsDiv.innerHTML = `<span class="error">Ошибка: ${error.message}</span>`;
+                resultsDiv.innerHTML = `<span class="error">${langData.calculateError}${error.message}</span>`;
                 // Сбрасываем характеристики при ошибке
                 vPeriTarget.textContent = '-';
                 vApoTarget.textContent = '-';
