@@ -90,7 +90,7 @@
         }
 
         /* Стандартный порядок */
-        .container {
+        .container.default {
             grid-template-areas: 
                 "card1"
                 "card2"
@@ -99,7 +99,7 @@
         }
         
         /* Результаты сверху */
-        .results-top {
+        .container.results-top {
             grid-template-areas: 
                 "card4"
                 "card1"
@@ -108,7 +108,7 @@
         }
         
         /* Целевая орбита сверху */
-        .target-top {
+        .container.target-top {
             grid-template-areas: 
                 "card3"
                 "card1"
@@ -123,21 +123,23 @@
         .card:nth-child(4) { grid-area: card4; }
 
         @media (min-width: 900px) {
-            .container {
+            .container.default {
                 grid-template-columns: 1fr 1fr;
                 grid-template-areas: 
                     "card1 card2"
                     "card3 card4";
             }
             
-            .results-top {
+            .container.results-top {
+                grid-template-columns: 1fr 1fr;
                 grid-template-areas: 
                     "card4 card4"
                     "card1 card2"
                     "card3 card3";
             }
             
-            .target-top {
+            .container.target-top {
+                grid-template-columns: 1fr 1fr;
                 grid-template-areas: 
                     "card3 card3"
                     "card1 card2"
@@ -442,7 +444,7 @@
         
         /* Контент бокового меню */
         .sidebar-content {
-            margin-top: 40px; /* Добавленный отступ для контента меню */
+            margin-top: 40px;
             padding: 0 15px;
         }
     </style>
@@ -452,7 +454,7 @@
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         
-        <div class="sidebar-content"> <!-- Добавленный контейнер для контента -->
+        <div class="sidebar-content">
             <div class="theme-switch">
                 <span class="theme-label">Тёмная тема</span>
                 <label class="switch">
@@ -462,7 +464,7 @@
                 <span class="theme-label">Светлая тема</span>
             </div>
             
-            <!-- Новый переключатель порядка блоков -->
+            <!-- Переключатель порядка блоков -->
             <div class="order-switch">
                 <span class="order-label">Порядок блоков:</span>
                 <select id="orderToggle">
@@ -482,7 +484,7 @@
         <div class="subtitle">Расчёт манёвров перехода для RSS</div>
     </header>
     
-    <div class="container">
+    <div class="container default">
         <div class="card">
             <h2 class="card-title">Параметры небесного тела</h2>
             
@@ -526,12 +528,12 @@
             <div id="initOrbitInputs">
                 <div class="orbit-inputs">
                     <div class="form-group">
-                        <label for="periapsisInit">Перицентр (км):</label>
+                        <label for="periapsisInit">Апоцентр (км):</label>
                         <input type="number" id="periapsisInit" value="150">
                     </div>
                     
                     <div class="form-group">
-                        <label for="apoapsisInit">Апоцентр (км):</label>
+                        <label for="apoapsisInit">Перицентр (км):</label>
                         <input type="number" id="apoapsisInit" value="150">
                     </div>
                 </div>
@@ -555,12 +557,12 @@
             <div id="targetOrbitInputs">
                 <div class="orbit-inputs">
                     <div class="form-group">
-                        <label for="periapsisTarget">Перицентр (км):</label>
+                        <label for="periapsisTarget">Апоцентр (км):</label>
                         <input type="number" id="periapsisTarget" value="150">
                     </div>
                     
                     <div class="form-group">
-                        <label for="apoapsisTarget">Апоцентр (км):</label>
+                        <label for="apoapsisTarget">Перицентр (км):</label>
                         <input type="number" id="apoapsisTarget" value="150">
                     </div>
                 </div>
@@ -595,7 +597,7 @@
             { name: 'Плутон',   gm: 8.71e11,    radius: 1187.0 }
         ];
 
-        // Спутники (группируем по родительским планетам)
+        // Спутники
         const satellites = [
             // Земля (индекс 2)
             [
@@ -660,6 +662,35 @@
         const container = document.querySelector('.container');
         const orderToggle = document.getElementById('orderToggle');
 
+        // Изменение порядка блоков
+        function changeBlockOrder(order) {
+            if (!container || !orderToggle) return;
+            
+            if (!order) {
+                order = orderToggle.value;
+            }
+            
+            // Удаляем все классы порядка
+            container.classList.remove('default', 'results-top', 'target-top');
+            
+            // Добавляем нужный класс
+            if (order === 'results-top') {
+                container.classList.add('results-top');
+            } 
+            else if (order === 'target-top') {
+                container.classList.add('target-top');
+            }
+            else {
+                container.classList.add('default');
+            }
+            
+            // Сохраняем выбор в localStorage
+            localStorage.setItem('blockOrder', order);
+            if (orderToggle) {
+                orderToggle.value = order;
+            }
+        }
+
         // Инициализация приложения
         function initApp() {
             // Заполняем спутники для текущей планеты
@@ -686,13 +717,13 @@
             themeToggle.addEventListener('change', toggleTheme);
             
             // Обработка переключения порядка блоков
-            orderToggle.addEventListener('change', changeBlockOrder);
+            orderToggle.addEventListener('change', () => changeBlockOrder());
             
             // Восстановление темы из localStorage
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'light') {
                 document.body.classList.add('light-theme');
-                themeToggle.checked = true;
+                if (themeToggle) themeToggle.checked = true;
             }
             
             // Восстановление порядка блоков из localStorage
@@ -938,29 +969,6 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
-        
-        // Изменение порядка блоков
-        function changeBlockOrder(order) {
-            // Если не передали параметр - берем из select
-            if (!order) {
-                order = orderToggle.value;
-            }
-            
-            // Удаляем все классы порядка
-            container.classList.remove('results-top', 'target-top');
-            
-            // Добавляем только нужный класс
-            if (order === 'results-top') {
-                container.classList.add('results-top');
-            } 
-            else if (order === 'target-top') {
-                container.classList.add('target-top');
-            }
-            
-            // Сохраняем выбор в localStorage
-            localStorage.setItem('blockOrder', order);
-            orderToggle.value = order;
-        }
 
         // Управление боковым меню
         function openNav() {
@@ -974,7 +982,7 @@
         }
 
         // Инициализация приложения при загрузке
-        window.addEventListener('DOMContentLoaded', initApp);
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
