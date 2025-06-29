@@ -115,6 +115,15 @@
                 "card2"
                 "card4";
         }
+        
+        /* Параметры тела сверху */
+        .container.wide-first {
+            grid-template-areas: 
+                "card1"
+                "card2"
+                "card3"
+                "card4";
+        }
 
         /* Назначаем областям карточки */
         .card:nth-child(1) { grid-area: card1; }
@@ -127,7 +136,7 @@
                 grid-template-columns: 1fr 1fr;
                 grid-template-areas: 
                     "card1 card2"
-                    "card3 card4";
+                    "card4 card3";
             }
             
             .container.results-top {
@@ -143,6 +152,14 @@
                 grid-template-areas: 
                     "card3 card3"
                     "card1 card2"
+                    "card4 card4";
+            }
+            
+            .container.wide-first {
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas: 
+                    "card1 card1"
+                    "card2 card3"
                     "card4 card4";
             }
         }
@@ -471,6 +488,7 @@
                     <option value="default">Стандартный</option>
                     <option value="results-top">Результаты сверху</option>
                     <option value="target-top">Целевая орбита сверху</option>
+                    <option value="wide-first">Параметры тела сверху</option>
                 </select>
             </div>
         </div>
@@ -528,12 +546,12 @@
             <div id="initOrbitInputs">
                 <div class="orbit-inputs">
                     <div class="form-group">
-                        <label for="periapsisInit">Апоцентр (км):</label>
+                        <label for="periapsisInit">Перицентр (км):</label>
                         <input type="number" id="periapsisInit" value="150">
                     </div>
                     
                     <div class="form-group">
-                        <label for="apoapsisInit">Перицентр (км):</label>
+                        <label for="apoapsisInit">Апоцентр (км):</label>
                         <input type="number" id="apoapsisInit" value="150">
                     </div>
                 </div>
@@ -557,12 +575,12 @@
             <div id="targetOrbitInputs">
                 <div class="orbit-inputs">
                     <div class="form-group">
-                        <label for="periapsisTarget">Апоцентр (км):</label>
+                        <label for="periapsisTarget">Перицентр (км):</label>
                         <input type="number" id="periapsisTarget" value="150">
                     </div>
                     
                     <div class="form-group">
-                        <label for="apoapsisTarget">Перицентр (км):</label>
+                        <label for="apoapsisTarget">Апоцентр (км):</label>
                         <input type="number" id="apoapsisTarget" value="150">
                     </div>
                 </div>
@@ -613,7 +631,7 @@
             // Юпитер (индекс 4)
             [
                 { name: 'Ио', gm: 5.959916e12, radius: 1821.6 },
-                { name: 'Европа', gm: 3.202739e12, radius: 1560.8 },
+                { name: 'Гейропа', gm: 3.202739e12, radius: 1560.8 },
                 { name: 'Ганимед', gm: 9.887819e12, radius: 2631.2 },
                 { name: 'Каллисто', gm: 7.179289e12, radius: 2410.3 }
             ],
@@ -625,8 +643,8 @@
                 { name: 'Тефия', gm: 4.121e10, radius: 533.0 },
                 { name: 'Диона', gm: 7.311e10, radius: 561.7 },
                 { name: 'Рея', gm: 1.538e11, radius: 764.3 },
-                { name: 'Титан', gm: 8.978e12, radius: 2575.5 },
-                { name: 'Ёпта', gm: 1.205e11, radius: 735.6 }
+                { name: 'Тинатата', gm: 8.978e12, radius: 2575.5 },
+                { name: 'Япта', gm: 1.205e11, radius: 735.6 }
             ],
             
             // Уран (индекс 6)
@@ -671,7 +689,7 @@
             }
             
             // Удаляем все классы порядка
-            container.classList.remove('default', 'results-top', 'target-top');
+            container.classList.remove('default', 'results-top', 'target-top', 'wide-first');
             
             // Добавляем нужный класс
             if (order === 'results-top') {
@@ -679,6 +697,9 @@
             } 
             else if (order === 'target-top') {
                 container.classList.add('target-top');
+            }
+            else if (order === 'wide-first') {
+                container.classList.add('wide-first');
             }
             else {
                 container.classList.add('default');
