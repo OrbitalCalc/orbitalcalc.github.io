@@ -86,11 +86,65 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 25px;
+            transition: grid-template-areas 0.3s ease;
         }
+
+        /* Стандартный порядок */
+        .container.default-order {
+            grid-template-areas: 
+                "card1"
+                "card2"
+                "card3"
+                "card4";
+        }
+        
+        /* Результаты сверху */
+        .container.results-top {
+            grid-template-areas: 
+                "card4"
+                "card1"
+                "card2"
+                "card3";
+        }
+        
+        /* Целевая орбита сверху */
+        .container.target-top {
+            grid-template-areas: 
+                "card3"
+                "card1"
+                "card2"
+                "card4";
+        }
+
+        /* Назначаем областям карточки */
+        .card:nth-child(1) { grid-area: card1; }
+        .card:nth-child(2) { grid-area: card2; }
+        .card:nth-child(3) { grid-area: card3; }
+        .card:nth-child(4) { grid-area: card4; }
 
         @media (min-width: 900px) {
             .container {
                 grid-template-columns: 1fr 1fr;
+            }
+            
+            .container.default-order {
+                grid-template-areas: 
+                    "card1 card2"
+                    "card3 card4";
+            }
+            
+            .container.results-top {
+                grid-template-areas: 
+                    "card4 card4"
+                    "card1 card2"
+                    "card3 .";
+            }
+            
+            .container.target-top {
+                grid-template-areas: 
+                    "card3 card3"
+                    "card1 card2"
+                    "card4 .";
             }
         }
 
@@ -364,6 +418,30 @@
         input:checked + .slider:before {
             transform: translateX(26px);
         }
+        
+        /* Стили для переключателя порядка */
+        .order-switch {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-label {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        #orderToggle {
+            width: 100%;
+            padding: 10px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body class="dark-theme">
@@ -378,6 +456,16 @@
             </label>
             <span class="theme-label">Светлая тема</span>
         </div>
+        
+        <!-- Новый переключатель порядка блоков -->
+        <div class="order-switch">
+            <span class="order-label">Порядок блоков:</span>
+            <select id="orderToggle">
+                <option value="default">Стандартный</option>
+                <option value="results-top">Результаты сверху</option>
+                <option value="target-top">Целевая орбита сверху</option>
+            </select>
+        </div>
     </div>
 
     <!-- Кнопка открытия меню -->
@@ -388,7 +476,7 @@
         <div class="subtitle">Расчёт манёвров перехода для RSS</div>
     </header>
     
-    <div class="container">
+    <div class="container default-order">
         <div class="card">
             <h2 class="card-title">Параметры небесного тела</h2>
             
@@ -518,7 +606,7 @@
             [
                 { name: 'Ио', gm: 5.959916e12, radius: 1821.6 },
                 { name: 'Европа', gm: 3.202739e12, radius: 1560.8 },
-                { name: 'Геймед', gm: 9.887819e12, radius: 2631.2 },
+                { name: 'Ганимед', gm: 9.887819e12, radius: 2631.2 },
                 { name: 'Каллисто', gm: 7.179289e12, radius: 2410.3 }
             ],
             
@@ -563,6 +651,8 @@
         const calculateBtn = document.getElementById('calculateBtn');
         const themeToggle = document.getElementById('themeToggle');
         const bodyElement = document.body;
+        const container = document.querySelector('.container');
+        const orderToggle = document.getElementById('orderToggle');
 
         // Инициализация приложения
         function initApp() {
@@ -589,11 +679,22 @@
             // Обработка переключения темы
             themeToggle.addEventListener('change', toggleTheme);
             
+            // Обработка переключения порядка блоков
+            orderToggle.addEventListener('change', changeBlockOrder);
+            
             // Восстановление темы из localStorage
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'light') {
                 document.body.classList.add('light-theme');
                 themeToggle.checked = true;
+            }
+            
+            // Восстановление порядка блоков из localStorage
+            const savedOrder = localStorage.getItem('blockOrder');
+            if (savedOrder) {
+                container.classList.remove('default-order', 'results-top', 'target-top');
+                container.classList.add(savedOrder);
+                orderToggle.value = savedOrder;
             }
         }
 
@@ -832,6 +933,14 @@
             } else {
                 localStorage.setItem('theme', 'dark');
             }
+        }
+        
+        // Изменение порядка блоков
+        function changeBlockOrder() {
+            const order = orderToggle.value;
+            container.classList.remove('default-order', 'results-top', 'target-top');
+            container.classList.add(order);
+            localStorage.setItem('blockOrder', order);
         }
 
         // Управление боковым меню
