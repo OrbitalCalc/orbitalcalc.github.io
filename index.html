@@ -90,7 +90,7 @@
         }
 
         /* Стандартный порядок */
-        .container.default-order {
+        .container {
             grid-template-areas: 
                 "card1"
                 "card2"
@@ -99,7 +99,7 @@
         }
         
         /* Результаты сверху */
-        .container.results-top {
+        .results-top {
             grid-template-areas: 
                 "card4"
                 "card1"
@@ -108,7 +108,7 @@
         }
         
         /* Целевая орбита сверху */
-        .container.target-top {
+        .target-top {
             grid-template-areas: 
                 "card3"
                 "card1"
@@ -125,26 +125,23 @@
         @media (min-width: 900px) {
             .container {
                 grid-template-columns: 1fr 1fr;
-            }
-            
-            .container.default-order {
                 grid-template-areas: 
                     "card1 card2"
                     "card3 card4";
             }
             
-            .container.results-top {
+            .results-top {
                 grid-template-areas: 
                     "card4 card4"
                     "card1 card2"
-                    "card3 .";
+                    "card3 card3";
             }
             
-            .container.target-top {
+            .target-top {
                 grid-template-areas: 
                     "card3 card3"
                     "card1 card2"
-                    "card4 .";
+                    "card4 card4";
             }
         }
 
@@ -442,29 +439,38 @@
             color: var(--text);
             font-size: 0.95rem;
         }
+        
+        /* Контент бокового меню */
+        .sidebar-content {
+            margin-top: 40px; /* Добавленный отступ для контента меню */
+            padding: 0 15px;
+        }
     </style>
 </head>
 <body class="dark-theme">
     <!-- Боковое меню -->
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <div class="theme-switch">
-            <span class="theme-label">Тёмная тема</span>
-            <label class="switch">
-                <input type="checkbox" id="themeToggle">
-                <span class="slider"></span>
-            </label>
-            <span class="theme-label">Светлая тема</span>
-        </div>
         
-        <!-- Новый переключатель порядка блоков -->
-        <div class="order-switch">
-            <span class="order-label">Порядок блоков:</span>
-            <select id="orderToggle">
-                <option value="default">Стандартный</option>
-                <option value="results-top">Результаты сверху</option>
-                <option value="target-top">Целевая орбита сверху</option>
-            </select>
+        <div class="sidebar-content"> <!-- Добавленный контейнер для контента -->
+            <div class="theme-switch">
+                <span class="theme-label">Тёмная тема</span>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider"></span>
+                </label>
+                <span class="theme-label">Светлая тема</span>
+            </div>
+            
+            <!-- Новый переключатель порядка блоков -->
+            <div class="order-switch">
+                <span class="order-label">Порядок блоков:</span>
+                <select id="orderToggle">
+                    <option value="default">Стандартный</option>
+                    <option value="results-top">Результаты сверху</option>
+                    <option value="target-top">Целевая орбита сверху</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -476,7 +482,7 @@
         <div class="subtitle">Расчёт манёвров перехода для RSS</div>
     </header>
     
-    <div class="container default-order">
+    <div class="container">
         <div class="card">
             <h2 class="card-title">Параметры небесного тела</h2>
             
@@ -692,9 +698,7 @@
             // Восстановление порядка блоков из localStorage
             const savedOrder = localStorage.getItem('blockOrder');
             if (savedOrder) {
-                container.classList.remove('default-order', 'results-top', 'target-top');
-                container.classList.add(savedOrder);
-                orderToggle.value = savedOrder;
+                changeBlockOrder(savedOrder);
             }
         }
 
@@ -921,7 +925,7 @@
 
         // Определение типа манёвра
         function getBurnType(deltaV) {
-            return deltaV > 0 ? 'разгон' : 'торможение';
+            return deltaV > 0 ? 'разгон' : ' торможение';
         }
 
         // Переключение темы
@@ -936,11 +940,26 @@
         }
         
         // Изменение порядка блоков
-        function changeBlockOrder() {
-            const order = orderToggle.value;
-            container.classList.remove('default-order', 'results-top', 'target-top');
-            container.classList.add(order);
+        function changeBlockOrder(order) {
+            // Если не передали параметр - берем из select
+            if (!order) {
+                order = orderToggle.value;
+            }
+            
+            // Удаляем все классы порядка
+            container.classList.remove('results-top', 'target-top');
+            
+            // Добавляем только нужный класс
+            if (order === 'results-top') {
+                container.classList.add('results-top');
+            } 
+            else if (order === 'target-top') {
+                container.classList.add('target-top');
+            }
+            
+            // Сохраняем выбор в localStorage
             localStorage.setItem('blockOrder', order);
+            orderToggle.value = order;
         }
 
         // Управление боковым меню
