@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математическая Вселенная</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- MathJax для формул -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .formula {
+            padding: 20px;
+            font-size: 1.2em;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>✨ Математическая Галактика ✨</h1>
+    </header>
+    
+    <main>
+        <section>
+            <h2>Формула Эйлера</h2>
+            <div class="formula">
+                \[ e^{i\pi} + 1 = 0 \]
+            </div>
+        </section>
+        
+        <section>
+            <h2>Теорема Пифагора</h2>
+            <div class="formula">
+                \[ a^2 + b^2 = c^2 \]
+            </div>
+            <div class="calculator">
+                <input type="number" id="a" placeholder="Катет a">
+                <input type="number" id="b" placeholder="Катет b">
+                <button onclick="calculate()">Вычислить гипотенузу</button>
+                <p>Результат: <span id="result"></span></p>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        // Простой математический калькулятор
+        function calculate() {
+            const a = parseFloat(document.getElementById('a').value);
+            const b = parseFloat(document.getElementById('b').value);
+            const c = Math.sqrt(a*a + b*b);
+            document.getElementById('result').textContent = c.toFixed(2);
+        }
+    </script>
+</body>
+</html>
