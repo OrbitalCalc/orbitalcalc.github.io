@@ -498,8 +498,22 @@
             margin-bottom: 10px;
             color: var(--text);
         }
+        
+        /* Стили для переключателя солнечной системы */
+        .solarsystem-switch {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
 
-        #orderToggle, #languageToggle {
+        .solarsystem-label {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        #orderToggle, #languageToggle, #solarsystemToggle {
             width: 100%;
             padding: 10px;
             background: var(--card);
@@ -550,6 +564,12 @@
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         
         <div class="sidebar-content">
+            <!-- Переключатель солнечной системы -->
+            <div class="solarsystem-switch">
+                <span class="solarsystem-label" id="solarsystemLabel">Солнечная система:</span>
+                <select id="solarsystemToggle"></select>
+            </div>
+            
             <div class="theme-switch">
                 <span class="theme-label">Тёмная тема</span>
                 <label class="switch">
@@ -596,24 +616,12 @@
             <div class="celestial-body-group">
                 <div class="form-group">
                     <label for="planet" id="planetLabel">Планета:</label>
-                    <select id="planet">
-                        <option value="0">Меркурий</option>
-                        <option value="1">Венера</option>
-                        <option value="2" selected>Земля</option>
-                        <option value="3">Марс</option>
-                        <option value="4">Юпитер</option>
-                        <option value="5">Сатурн</option>
-                        <option value="6">Уран</option>
-                        <option value="7">Нептун</option>
-                        <option value="8">Плутон</option>
-                    </select>
+                    <select id="planet"></select>
                 </div>
                 
                 <div class="form-group" id="satellite-group">
                     <label for="satellite" id="satelliteLabel">Спутник:</label>
-                    <select id="satellite">
-                        <option value="-1">(Сама планета)</option>
-                    </select>
+                    <select id="satellite"></select>
                 </div>
             </div>
         </div>
@@ -681,77 +689,289 @@
         // Константы
         const G = 6.67430e-11; // Гравитационная постоянная
 
-        // Основные планеты
-        const planets = [
-            { name: 'Ртуть', name_en: 'Mercury', gm: 2.203178e13, radius: 2439.7 },
-            { name: 'Венера',   name_en: 'Athena',   gm: 3.248586e14, radius: 6049.0 },
-            { name: 'Земля',    name_en: 'Dirt',   gm: 3.986004e14, radius: 6371.0 },
-            { name: 'Марс',     name_en: 'Mars',    gm: 4.282831e13, radius: 3375.8 },
-            { name: 'Юпитер',   name_en: 'Jupiter', gm: 1.266865e17, radius: 69373.0 },
-            { name: 'Сатурн',   name_en: 'Saturn',  gm: 3.793119e16, radius: 57216.0 },
-            { name: 'Уран',     name_en: 'Ur Anus',  gm: 5.793940e15, radius: 24702.0 },
-            { name: 'Нептун',   name_en: 'Neptune', gm: 6.836530e15, radius: 24085.0 },
-            { name: 'Плутон',   name_en: 'Pluto',   gm: 8.71e11,     radius: 1187.0 }
-        ];
-
-        // Спутники
-        const satellites = [
-            // Земля (индекс 2)
-            [
-                { name: 'Луна', name_en: 'Moon', gm: 4.9048695e12, radius: 1737.4 }
-            ],
-            
-            // Марс (индекс 3)
-            [
-                { name: 'Фобос', name_en: 'Phobos', gm: 7.08e9, radius: 11.1 },
-                { name: 'Деймос', name_en: 'Deimos', gm: 1.48e9, radius: 6.2 }
-            ],
-            
-            // Юпитер (индекс 4)
-            [
-                { name: 'Йоу', name_en: 'Yo', gm: 5.959916e12, radius: 1821.6 },
-                { name: 'Гейропа', name_en: 'Europa', gm: 3.202739e12, radius: 1560.8 },
-                { name: 'Ганимед', name_en: 'Gаymede', gm: 9.887819e12, radius: 2631.2 },
-                { name: 'Каллисто', name_en: 'Callisto', gm: 7.179289e12, radius: 2410.3 }
-            ],
-            
-            // Сатурн (индекс 5)
-            [
-                { name: 'Мимас', name_en: 'Mimas', gm: 2.503e9, radius: 198.2 },
-                { name: 'Энцелад', name_en: 'Enceladus', gm: 7.209e9, radius: 252.1 },
-                { name: 'Тефия', name_en: 'Tethys', gm: 4.121e10, radius: 533.0 },
-                { name: 'Диона', name_en: 'Dione', gm: 7.311e10, radius: 561.7 },
-                { name: 'Рея', name_en: 'Rhea', gm: 1.538e11, radius: 764.3 },
-                { name: 'Титан', name_en: 'Titan', gm: 8.978e12, radius: 2575.5 },
-                { name: 'Япта', name_en: 'Iapetus', gm: 1.205e11, radius: 735.6 }
-            ],
-            
-            // Уран (индекс 6)
-            [
-                { name: 'Миранда', name_en: 'Mirinda', gm: 4.4e9, radius: 235.8 },
-                { name: 'Ариэль', name_en: 'Ariel', gm: 1.35e11, radius: 578.9 },
-                { name: 'Умбриэль', name_en: 'Umbrella', gm: 1.17e11, radius: 584.7 },
-                { name: 'Титания', name_en: 'Titania', gm: 2.37e11, radius: 788.9 },
-                { name: 'Овертон', name_en: 'Oberon', gm: 2.01e11, radius: 761.4 }
-            ],
-            
-            // Нептун (индекс 7)
-            [
-                { name: 'Тритон', name_en: 'Triton', gm: 1.428e12, radius: 1353.4 }
-            ],
-            
-            // Плутон (индекс 8)
-            [
-                { name: 'Харон', name_en: 'Charon', gm: 1.058e11, radius: 606.0 }
-            ]
+        // Солнечные системы
+        const solarSystems = [
+            {
+                id: "rss",
+                name: "РСС",
+                name_en: "RSS",
+                bodies: [
+                    { 
+                        name: 'Меркурий', 
+                        name_en: 'Mercury', 
+                        gm: 2.203178e13, 
+                        radius: 2439.7,
+                        satellites: [] 
+                    },
+                    { 
+                        name: 'Венера',   
+                        name_en: 'Venus',   
+                        gm: 3.248586e14, 
+                        radius: 6049.0,
+                        satellites: [] 
+                    },
+                    { 
+                        name: 'Земля',    
+                        name_en: 'Earth',   
+                        gm: 3.986004e14, 
+                        radius: 6371.0,
+                        satellites: [
+                            { name: 'Луна', name_en: 'Moon', gm: 4.9048695e12, radius: 1737.4 }
+                        ] 
+                    },
+                    { 
+                        name: 'Марс',     
+                        name_en: 'Mars',    
+                        gm: 4.282831e13, 
+                        radius: 3375.8,
+                        satellites: [
+                            { name: 'Фобос', name_en: 'Phobos', gm: 7.08e9, radius: 11.1 },
+                            { name: 'Деймос', name_en: 'Deimos', gm: 1.48e9, radius: 6.2 }
+                        ] 
+                    },
+                    { 
+                        name: 'Юпитер',   
+                        name_en: 'Jupiter', 
+                        gm: 1.266865e17, 
+                        radius: 69373.0,
+                        satellites: [
+                            { name: 'Ио', name_en: 'Io', gm: 5.959916e12, radius: 1821.6 },
+                            { name: 'Европа', name_en: 'Europa', gm: 3.202739e12, radius: 1560.8 },
+                            { name: 'Ганимед', name_en: 'Ganymede', gm: 9.887819e12, radius: 2631.2 },
+                            { name: 'Каллисто', name_en: 'Callisto', gm: 7.179289e12, radius: 2410.3 }
+                        ] 
+                    },
+                    { 
+                        name: 'Сатурн',   
+                        name_en: 'Saturn',  
+                        gm: 3.793119e16, 
+                        radius: 57216.0,
+                        satellites: [
+                            { name: 'Мимас', name_en: 'Mimas', gm: 2.503e9, radius: 198.2 },
+                            { name: 'Энцелад', name_en: 'Enceladus', gm: 7.209e9, radius: 252.1 },
+                            { name: 'Тефия', name_en: 'Tethys', gm: 4.121e10, radius: 533.0 },
+                            { name: 'Диона', name_en: 'Dione', gm: 7.311e10, radius: 561.7 },
+                            { name: 'Рея', name_en: 'Rhea', gm: 1.538e11, radius: 764.3 },
+                            { name: 'Титан', name_en: 'Titan', gm: 8.978e12, radius: 2575.5 },
+                            { name: 'Япет', name_en: 'Iapetus', gm: 1.205e11, radius: 735.6 }
+                        ] 
+                    },
+                    { 
+                        name: 'Уран',     
+                        name_en: 'Uranus',  
+                        gm: 5.793940e15, 
+                        radius: 24702.0,
+                        satellites: [
+                            { name: 'Миранда', name_en: 'Miranda', gm: 4.4e9, radius: 235.8 },
+                            { name: 'Ариэль', name_en: 'Ariel', gm: 1.35e11, radius: 578.9 },
+                            { name: 'Умбриэль', name_en: 'Umbriel', gm: 1.17e11, radius: 584.7 },
+                            { name: 'Титания', name_en: 'Titania', gm: 2.37e11, radius: 788.9 },
+                            { name: 'Оберон', name_en: 'Oberon', gm: 2.01e11, radius: 761.4 }
+                        ] 
+                    },
+                    { 
+                        name: 'Нептун',   
+                        name_en: 'Neptune', 
+                        gm: 6.836530e15, 
+                        radius: 24085.0,
+                        satellites: [
+                            { name: 'Тритон', name_en: 'Triton', gm: 1.428e12, radius: 1353.4 }
+                        ] 
+                    },
+                    { 
+                        name: 'Плутон',   
+                        name_en: 'Pluto',   
+                        gm: 8.71e11,     
+                        radius: 1187.0,
+                        satellites: [
+                            { name: 'Харон', name_en: 'Charon', gm: 1.058e11, radius: 606.0 }
+                        ] 
+                    }
+                ]
+            },
+            {
+                id: "ksp",
+                name: "Ванильная КСП",
+                name_en: "Vanilla KSP",
+                bodies: [
+                    { 
+                        name: 'Мохо', 
+                        name_en: 'Moho', 
+                        gm: 1.686093e11, 
+                        radius: 250,
+                        satellites: [] 
+                    },
+                    { 
+                      name: 'Ева', 
+                        name_en: 'Eve', 
+                        gm: 8.17173e12, 
+                        radius: 700,
+                        satellites: [
+                            { name: 'Гилли', name_en: 'Gilly', gm: 8.2894e6, radius: 13 }
+                        ]  
+                    },
+                    { 
+                        name: 'Кербин', 
+                        name_en: 'Kerbin', 
+                        gm: 3.5316e12, 
+                        radius: 600,
+                        satellites: [
+                            { name: 'Муна', name_en: 'Mun', gm: 6.5138398e10, radius: 200 },
+                            { name: 'Минмус', name_en: 'Minmus', gm: 1.7658e9, radius: 60 }
+                        ] 
+                    },
+                    { 
+                        name: 'Дюна', 
+                        name_en: 'Duna', 
+                        gm: 3.013632e11, 
+                        radius: 320,
+                        satellites: [
+                            { name: 'Айк', name_en: 'Ike', gm: 1.856836e10, radius: 130 }
+                        ] 
+                    },
+                    { 
+                        name: 'Джул', 
+                        name_en: 'Jool', 
+                        gm: 2.82528e14, 
+                        radius: 6000,
+                        satellites: [
+                            { name: 'Лейт', name_en: 'Laythe', gm: 1.962e12, radius: 500 },
+                            { name: 'Валл', name_en: 'Vall', gm: 2.0748e11, radius: 300 },
+                            { name: 'Тайло', name_en: 'Tylo', gm: 2.825e12, radius: 600 },
+                            { name: 'Боп', name_en: 'Bop', gm: 2.486e9, radius: 65 },
+                            { name: 'Пол', name_en: 'Pol', gm: 7.217e8, radius: 44 }
+                        ] 
+                    },
+                    {
+                        name_en: 'Eeloo',
+                        name: 'Илу',
+                        gm: 7.4410815e10,
+                        radius: 210,
+                        satellites: []
+                    }
+                ]
+            },
+            {
+                id: "JNSQ",
+                name: "ЖЕНЕСКЮ",
+                name_en: "JNSQ",
+                bodies: [
+                    { 
+                        name: 'Мохо', 
+                        name_en: 'Moho', 
+                        gm: 1.20156e12, 
+                        radius: 652.3,
+                        satellites: [] 
+                    },
+                    { 
+                        name: 'Ева', 
+                        name_en: 'Eve', 
+                        gm: 5.76974e13, 
+                        radius: 2052.0,
+                        satellites: [
+                            { name: 'Гилли', name_en: 'Gilly', gm: 6.61949e7, radius: 33.0 }
+                        ] 
+                    },
+                    { 
+                        name: 'Кербин', 
+                        name_en: 'Kerbin', 
+                        gm: 2.51050e13, 
+                        radius: 1600.4,
+                        satellites: [
+                            { name: 'Муна', name_en: 'Mun', gm: 2.27514e11, radius: 401.1 },
+                            { name: 'Минмус', name_en: 'Minmus', gm: 1.25525e10, radius: 160.3 }
+                        ] 
+                    },
+                    { 
+                        name: 'Дюна', 
+                        name_en: 'Duna', 
+                        gm: 2.13393e12, 
+                        radius: 801.5,
+                        satellites: [
+                            { name: 'Айк', name_en: 'Ike', gm: 2.59484e10, radius: 211.1 }
+                        ] 
+                    },
+                    { 
+                        name: 'Эдна', 
+                        name_en: 'Edna', 
+                        gm: 5.30344e10, 
+                        radius: 261.0,
+                        satellites: [
+                            { name: 'Дак', name_en: 'Dak', gm: 3.13813e7, radius: 26.1 }
+                        ] 
+                    },
+                    { 
+                        name: 'Дрес', 
+                        name_en: 'Dres', 
+                        gm: 1.52513e11, 
+                        radius: 361.6,
+                        satellites: [] 
+                    },
+                    { 
+                        name: 'Джул', 
+                        name_en: 'Jool', 
+                        gm: 1.99899e15, 
+                        radius: 14000.0,
+                        satellites: [
+                            { name: 'Лейт', name_en: 'Laythe', gm: 6.88231e12, radius: 1100.1 },
+                            { name: 'Валл', name_en: 'Vall', gm: 5.33972e11, radius: 552.3 },
+                            { name: 'Тайло', name_en: 'Tylo', gm: 2.54188e12, radius: 903.0 },
+                            { name: 'Боп', name_en: 'Bop', gm: 1.77010e10, radius: 190.8 },
+                            { name: 'Пол', name_en: 'Pol', gm: 4.97197e9, radius: 130.5 }
+                        ] 
+                    },
+                    { 
+                        name: 'Линдор', 
+                        name_en: 'Lindor', 
+                        gm: 5.89968e14, 
+                        radius: 8000.0,
+                        satellites: [
+                            { name: 'Крел', name_en: 'Krel', gm: 6.61949e9, radius: 150.8 },
+                            { name: 'Аден', name_en: 'Aden', gm: 6.17819e10, radius: 300.8 },
+                            { name: 'Гюйген', name_en: 'Huygen', gm: 6.60331e11, radius: 670.9 },
+                            { name: 'Рига', name_en: 'Riga', gm: 9.92923e11, radius: 751.4 },
+                            { name: 'Талос', name_en: 'Talos', gm: 2.69683e11, radius: 501.3 }
+                        ] 
+                    },
+                    { 
+                        name: 'Илу', 
+                        name_en: 'Eeloo', 
+                        gm: 5.29559e11, 
+                        radius: 602.6,
+                        satellites: [
+                            { name: 'Селес', name_en: 'Celes', gm: 1.56906e10, radius: 200.9 },
+                            { name: 'Там', name_en: 'Tam', gm: 3.43233e6, radius: 13.6 }
+                        ] 
+                    },
+                    { 
+                        name: 'Хамек', 
+                        name_en: 'Hamek', 
+                        gm: 1.98585e11, 
+                        radius: 451.3,
+                        satellites: [] 
+                    },
+                    { 
+                        name: 'Нара', 
+                        name_en: 'Nara', 
+                        gm: 1.27094e14, 
+                        radius: 3601.6,
+                        satellites: [
+                            { name: 'Амос', name_en: 'Amos', gm: 6.02521e10, radius: 321.2 },
+                            { name: 'Энон', name_en: 'Enon', gm: 7.20789e11, radius: 702.0 },
+                            { name: 'Пракс', name_en: 'Prax', gm: 2.37321e9, radius: 110.5 }
+                        ] 
+                    }
+                ]
+            }
         ];
 
         // Тексты локализации
         const translations = {
             ru: {
                 appTitle: "Орбитальный Калькулятор",
-                appSubtitle: "Расчёт орбитальных переходов для RSS",
+                appSubtitle: "Расчёт орбитальных переходов",
                 bodyParamsTitle: "Параметры небесного тела",
+                solarSystemLabel: "Солнечная система:",
                 planetLabel: "Планета:",
                 satelliteLabel: "Спутник:",
                 initialOrbitTitle: "Начальная орбита",
@@ -781,8 +1001,9 @@
             },
             en: {
                 appTitle: "Orbital Calculator",
-                appSubtitle: "Orbital maneuver calculation for RSS",
+                appSubtitle: "Orbital transfer calculation",
                 bodyParamsTitle: "Celestial Body Parameters",
+                solarSystemLabel: "Solar system:",
                 planetLabel: "Planet:",
                 satelliteLabel: "Satellite:",
                 initialOrbitTitle: "Initial Orbit",
@@ -813,6 +1034,7 @@
         };
 
         // DOM элементы
+        const solarsystemToggle = document.getElementById('solarsystemToggle');
         const planetSelect = document.getElementById('planet');
         const satelliteSelect = document.getElementById('satellite');
         const satelliteGroup = document.getElementById('satellite-group');
@@ -869,6 +1091,7 @@
             document.getElementById('appTitle').textContent = langData.appTitle;
             document.getElementById('appSubtitle').textContent = langData.appSubtitle;
             document.getElementById('bodyParamsTitle').textContent = langData.bodyParamsTitle;
+            document.getElementById('solarsystemLabel').textContent = langData.solarSystemLabel;
             document.getElementById('planetLabel').textContent = langData.planetLabel;
             document.getElementById('satelliteLabel').textContent = langData.satelliteLabel;
             document.getElementById('initialOrbitTitle').textContent = langData.initialOrbitTitle;
@@ -900,17 +1123,55 @@
             });
         }
 
+        // Обновление списка солнечных систем
+        function populateSolarSystems() {
+            const lang = localStorage.getItem('language') || 'ru';
+            solarsystemToggle.innerHTML = '';
+            
+            solarSystems.forEach((system, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = lang === 'ru' ? system.name : system.name_en;
+                solarsystemToggle.appendChild(option);
+            });
+        }
+
+        // Обновление списка планет
+        function updatePlanets() {
+            const systemIndex = parseInt(solarsystemToggle.value);
+            if (isNaN(systemIndex)) return;
+            
+            const system = solarSystems[systemIndex];
+            const lang = localStorage.getItem('language') || 'ru';
+            planetSelect.innerHTML = '';
+            
+            system.bodies.forEach((body, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = lang === 'ru' ? body.name : body.name_en;
+                planetSelect.appendChild(option);
+            });
+            
+            updateSatellites();
+        }
+
         // Обновление списка спутников
         function updateSatellites() {
+            const systemIndex = parseInt(solarsystemToggle.value);
+            if (isNaN(systemIndex)) return;
+            
             const planetIndex = parseInt(planetSelect.value);
+            if (isNaN(planetIndex)) return;
+            
+            const system = solarSystems[systemIndex];
+            const planet = system.bodies[planetIndex];
             const lang = localStorage.getItem('language') || 'ru';
+            
             satelliteSelect.innerHTML = '<option value="-1">' + 
                 (lang === 'ru' ? '(Сама планета)' : '(Planet itself)') + '</option>';
             
-            // Планеты, имеющие спутники (индексы 2-8)
-            if (planetIndex >= 2 && planetIndex <= 8) {
-                const satGroup = satellites[planetIndex - 2];
-                satGroup.forEach((sat, index) => {
+            if (planet.satellites && planet.satellites.length > 0) {
+                planet.satellites.forEach((sat, index) => {
                     const option = document.createElement('option');
                     option.value = index;
                     option.textContent = lang === 'ru' ? sat.name : sat.name_en;
@@ -919,21 +1180,6 @@
                 satelliteGroup.style.display = 'block';
             } else {
                 satelliteGroup.style.display = 'none';
-            }
-        }
-
-        // Обновление названий планет в выпадающем списке
-        function updatePlanetNames() {
-            const lang = localStorage.getItem('language') || 'ru';
-            const planetOptions = planetSelect.options;
-            
-            for (let i = 0; i < planetOptions.length; i++) {
-                const planetIndex = parseInt(planetOptions[i].value);
-                if (planetIndex >= 0 && planetIndex < planets.length) {
-                    planetOptions[i].textContent = lang === 'ru' ? 
-                        planets[planetIndex].name : 
-                        planets[planetIndex].name_en;
-                }
             }
         }
 
@@ -952,8 +1198,9 @@
             // Обновляем тексты интерфейса
             updateUITexts(lang);
             
-            // Обновляем названия планет и спутников
-            updatePlanetNames();
+            // Обновляем списки
+            populateSolarSystems();
+            updatePlanets();
             updateSatellites();
         }
 
@@ -963,11 +1210,8 @@
             const savedLang = localStorage.getItem('language') || 'ru';
             languageToggle.value = savedLang;
             
-            // Обновляем названия сразу при загрузке
-            updatePlanetNames();
-            updateSatellites();
-            
             // Настройка обработчиков событий
+            solarsystemToggle.addEventListener('change', updatePlanets);
             planetSelect.addEventListener('change', updateSatellites);
             calculateBtn.addEventListener('click', calculate);
             
@@ -987,6 +1231,11 @@
             // Обработка переключения порядка блоков
             orderToggle.addEventListener('change', () => changeBlockOrder());
             
+            // Заполняем списки
+            populateSolarSystems();
+            updatePlanets();
+            updateSatellites();
+            
             // Восстановление темы из localStorage
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'light') {
@@ -1000,27 +1249,42 @@
                 changeBlockOrder(savedOrder);
             }
             
+            // Восстановление выбранной солнечной системы
+            const savedSolarSystem = localStorage.getItem('solarSystem');
+            if (savedSolarSystem !== null) {
+                solarsystemToggle.value = savedSolarSystem;
+            }
+            
+            // Сохраняем выбор солнечной системы при изменении
+            solarsystemToggle.addEventListener('change', function() {
+                localStorage.setItem('solarSystem', this.value);
+            });
+            
             // Применяем сохраненный язык
             changeLanguage();
         }
 
         // Получение гравитационных параметров
         function getGravityParams() {
+            const systemIndex = parseInt(solarsystemToggle.value);
             const planetIndex = parseInt(planetSelect.value);
             const satelliteIndex = parseInt(satelliteSelect.value);
+            
+            const system = solarSystems[systemIndex];
+            const planet = system.bodies[planetIndex];
             
             // Если выбран спутник
             if (satelliteIndex >= 0) {
                 return {
-                    gm: satellites[planetIndex - 2][satelliteIndex].gm,
-                    radius: satellites[planetIndex - 2][satelliteIndex].radius * 1000
+                    gm: planet.satellites[satelliteIndex].gm,
+                    radius: planet.satellites[satelliteIndex].radius * 1000
                 };
             }
             
             // Если выбрана сама планета
             return {
-                gm: planets[planetIndex].gm,
-                radius: planets[planetIndex].radius * 1000
+                gm: planet.gm,
+                radius: planet.radius * 1000
             };
         }
 
